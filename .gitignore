@@ -1,0 +1,12 @@
+# Nix build artifacts
+/result
+/nix-build-*
+
+# SOPS secrets
+/secrets*.yaml
+/secrets*.json
+*.agekey
+
+# Editor junk
+*.swp
+*.bak

@@ -1,0 +1,17 @@
+{
+  # Laptop client: backs up to server over SSH
+  hp = {
+    name = "hp";
+    repo = "ssh://mike@nixos-server/mnt/backupdisk/borg/hp";
+    paths = [ "/etc/nixos" "/home/mike" ];
+    excludeFile = "/etc/nixos/backup-excludes.txt";
+  };
+
+  # NixOS server client
+  nixosServer = {
+    name = "nixosServer";
+    repo = "ssh://mike@nixos-server/mnt/backupdisk/borg/nixosServer";
+    paths = [ "/etc/nixos" "/home/mike" ];
+    excludeFile = null; # no exclude file for this client
+  };
+}

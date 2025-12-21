@@ -1,13 +1,14 @@
 {
   description = "Lenovo client NixOS configuration with SOPS and Borg backup";
-
+  
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
-    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
+  
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/c6245e83d836d0433170a16eb185cefe0572f8b8";
 
     sops-nix.url = "github:Mic92/sops-nix";
     sops-nix.inputs.nixpkgs.follows = "nixpkgs";
-  };
+ };
 
   outputs = { self, nixpkgs, nixpkgs-unstable, sops-nix, ... }:
   let

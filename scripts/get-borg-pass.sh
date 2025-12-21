@@ -1,0 +1,1 @@
+/home/mike/bin/get-borg-pass.sh

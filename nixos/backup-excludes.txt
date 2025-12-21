@@ -1,0 +1,46 @@
+/home/*/.local/share/Trash
+/home/*/.thumbnails
+/home/*/.mozilla
+/home/*/.config/google-chrome
+/home/*/.config/BraveSoftware
+/home/*/.config/libreoffice
+/home/*/.var/app
+/home/*/.steam
+/home/*/.vscode
+/var/tmp
+
+/var/lib/systemd
+/var/lib/docker
+/swapfile
+/.snapshots
+
+# ─── Temporary restore directory
+/etc/nixos/temp-restore
+
+# ─── User caches and trash
+/home/mike/.cache
+/home/mike/.local/share/Trash
+
+# ─── System caches and temp
+/var/cache
+/var/tmp
+/tmp
+
+# ─── System logs (optional if you prefer smaller backups)
+/var/log
+
+# ─── Nix store and profiles (can be regenerated)
+/nix/store
+/nix/var/nix/profiles
+
+# ----Secrets
+/etc/nixos/secrets/decrypted*
+/etc/nixos/secrets/*.plain
+/etc/nixos/secrets/*.bak
+/etc/nixos/secrets/*.orig
+/home/*/secrets/decrypted*
+/home/*/secrets/*.plain
+/home/*/secrets/*.bak
+/home/*/secrets/*.orig
+
+

@@ -1,0 +1,6 @@
+creation_rules:
+  - path_regex: .*\.(yaml|yml)$
+    key_groups:
+      - age:
+          - age12fkg2w22rapy8ddhvm4xdndj07p8hs5ggl7aus0de6upm60jxetqh748e0
+ 

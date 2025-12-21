@@ -13,7 +13,7 @@ in
   # MODULE IMPORTS
   # ------------------------------------------------
   imports = [
-    ./hardware-configuration.nix
+    ./modules/hardware-configuration.nix
     ./modules/borg-backup.nix
     ./modules/printers.nix
   ];

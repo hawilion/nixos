@@ -1,0 +1,100 @@
+{ config, pkgs, lib, ... }:
+
+let
+  # Helper to generate environment for borg passphrase
+  passphraseEnv = client:
+    let
+      yamlFile = config.borgBackup.passphrasesFile;
+    in
+      ''
+        #!/usr/bin/env bash
+        export BORG_PASSPHRASE=$(yq e ".${client}.passphrase" ${yamlFile} | sed 's/^"\(.*\)"$/\1/')
+      '';
+in
+{
+  options.borgBackup = {
+    enable = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = "Enable borg-backup services and timers";
+    };
+
+    clients = lib.mkOption {
+      type = lib.types.attrsOf (lib.types.submodule {
+        options = {
+          name = lib.mkOption { type = lib.types.str; };
+          repo = lib.mkOption { type = lib.types.str; };
+          paths = lib.mkOption { type = lib.types.listOf lib.types.str; };
+          excludeFile = lib.mkOption { type = lib.types.nullOr lib.types.str; default = null; };
+          backupTime = lib.mkOption { type = lib.types.nullOr lib.types.str; default = null; };
+        };
+      });
+      default = { };
+      description = "Borg backup clients";
+    };
+
+    passphrasesFile = lib.mkOption {
+      type = lib.types.str;
+      default = "/etc/nixos/secrets/secrets.yaml";
+      description = "Path to SOPS YAML containing borg passphrases";
+    };
+  };
+
+  config = lib.mkIf (config.borgBackup.enable) {
+
+    # -------- SYSTEMD SERVICES --------
+    systemd.services = lib.foldl' (acc: clientName:
+      let
+        client = config.borgBackup.clients.${clientName};
+        envFile = "/run/credentials/${clientName}.env";
+        excludeArg =
+          if client.excludeFile != null && client.excludeFile != "" then
+            "--exclude-from ${client.excludeFile}"
+          else "";
+      in
+        acc // {
+          # Environment generator service
+          "${clientName}-env-generator" = {
+            description = "Generate environment for ${clientName} borg backup";
+            serviceConfig = {
+              Type = "oneshot";
+              ExecStart = "${pkgs.bash}/bin/bash -c '${passphraseEnv clientName} > ${envFile}'";
+              RemainAfterExit = true;
+            };
+            install = { WantedBy = [ "multi-user.target" ]; };
+          };
+
+          # Backup service
+          "${clientName}.service" = {
+            description = "Borg backup for ${clientName}";
+            wants = [ "${clientName}-env-generator.service" ];
+            after = [ "${clientName}-env-generator.service" ];
+            serviceConfig = {
+              Type = "simple";
+              ExecStart = ''
+                source ${envFile}
+                ${pkgs.borgbackup}/bin/borg create --verbose --stats \
+                  ${excludeArg} \
+                  ${client.repo}::${client.name}-$(date +%Y-%m-%d_%H-%M-%S) \
+                  ${lib.concatStringsSep " " client.paths}
+              '';
+              EnvironmentFile = envFile;
+            };
+            install = { WantedBy = [ "multi-user.target" ]; };
+          };
+
+          # Backup timer
+          "${clientName}.timer" = {
+            description = "Timer for ${clientName} borg backup";
+            timerConfig = {
+              # Default to 02:00 if not specified
+              OnCalendar = "*-*-* ${builtins.elemAt (lib.splitString \":\" (if client.backupTime != null then client.backupTime else "02:00")) 0}:${builtins.elemAt (lib.splitString \":\" (if client.backupTime != null then client.backupTime else "02:00")) 1}:00";
+              Persistent = true;
+              Unit = "${clientName}.service";
+            };
+            install = { WantedBy = [ "timers.target" ]; };
+          };
+        }
+    {} (lib.attrNames config.borgBackup.clients));
+  };
+}

@@ -1,0 +1,60 @@
+# /home/*/... means: for any user in /home, exclude this path and everything inside it.
+# The * matches one user directory (e.g., /home/mike, /home/john), and the exclude is recursive.
+# ─── User caches and trash ──────────────────────────────
+/home/*/.cache
+/home/*/.local/share/Trash
+/home/*/.thumbnails
+
+# ─── Browsers and office apps ──────────────────────────
+/home/*/.mozilla
+/home/*/.config/google-chrome
+/home/*/.config/BraveSoftware
+/home/*/.config/libreoffice
+
+# ─── Steam, VSCode, JetBrains, and other dev tools ────
+/home/*/.steam
+/home/*/.vscode
+/home/*/.cache/JetBrains
+/home/*/.cache/spotify
+/home/*/.cache/mpv
+
+# ─── Flatpak / Snap / App runtime files ───────────────
+/home/*/.var/app
+
+# ─── User secrets ──────────────────────────────────────
+/home/*/secrets/decrypted*
+/home/*/secrets/*.plain
+/home/*/secrets/*.bak
+/home/*/secrets/*.orig
+
+# ─── System temporary and runtime files ────────────────
+/run/user/*
+/dev/shm
+/var/tmp
+/var/run
+/var/lock
+
+# ─── System caches ─────────────────────────────────────
+/var/cache
+/nix/store
+/nix/var/nix/profiles
+
+# ─── Docker, systemd, swap ─────────────────────────────
+/var/lib/docker
+/var/lib/systemd
+/swapfile
+
+# ─── Snapshots and temp restore dirs ──────────────────
+/.snapshots
+/etc/nixos/temp-restore
+
+# ─── Logs (optional, reduce backup size) ───────────────
+/var/log
+/var/log/journal/*
+/var/log/*.old
+
+# ─── Secrets in /etc/nixos ─────────────────────────────
+/etc/nixos/secrets/decrypted*
+/etc/nixos/secrets/*.plain
+/etc/nixos/secrets/*.bak
+/etc/nixos/secrets/*.orig
