@@ -2,20 +2,19 @@
 
 {
   environment.systemPackages = with pkgs; [
-    freecad      # comes from overlay (pinned unstable)
+    unstable.freecad
+    git
+    python312Packages.gitpython
+    
+    # Standard CAD tools (no extra fluff to break the build)
     openscad
-    blender
+    calculix-ccx
+    gmsh
+    adwaita-icon-theme
   ];
 
   environment.sessionVariables = {
-    OCC_DISPLAY_DRIVER = "OpenGL";
-    OCC_Antialiasing   = "1";
-    OCC_Shading        = "Phong";
+    __GLVND_EXPOSE_NATIVE_CONTEXTS = "1";
+    QT_X11_NO_MITSHM = "1";
   };
-
-  fonts.fontconfig.enable = true;
-  fonts.packages = with pkgs; [
-    dejavu_fonts
-    liberation_ttf
-  ];
 }

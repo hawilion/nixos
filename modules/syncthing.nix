@@ -20,8 +20,9 @@ in
     overrideDevices = false;  # don’t overwrite WebUI devices
     overrideFolders = false;  # don’t overwrite WebUI folders
 
-    settings = {
-      databaseTuning = "small";
+    settings = {    
+     deviceName = config.networking.hostName;
+    databaseTuning = "small";
       maxFolderConcurrency = 1;
       maxConcurrentIncomingRequestKiB = 32768;
      gui = {
@@ -32,8 +33,9 @@ in
       };
 
       devices = {
-        "nixos" = { id = "YFFNFOZ-WAWKGY5-BM3P3HM-EEEQTR5-PLYYUVQ-3ZLMNRG-5KJZRJH-4OCZTA6"; };
-        "pixel6" = { id = "SFARPSJ-2BWOM56-TEGSLNE-RGZ4Q62-TGBVOSM-FF46EVT-FB32HU7-YOLOWAK"; };
+        "hp" = { id = "YFFNFOZ-WAWKGY5-BM3P3HM-EEEQTR5-PLYYUVQ-3ZLMNRG-5KJZRJH-4OCZTA6"; };
+        "pixel10" = { id = "SFARPSJ-2BWOM56-TEGSLNE-RGZ4Q62-TGBVOSM-FF46EVT-FB32HU7-YOLOWAK"; };
+        "lenovo" = { id = ""}; };
       };
 
       folders = {
