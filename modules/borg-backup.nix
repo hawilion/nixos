@@ -21,7 +21,7 @@ in
           };
           repo = lib.mkOption {
             type = lib.types.str;
-            description = "Repository path.";
+            description = "Repository path (user@ip:/path).";
           };
           schedule = lib.mkOption {
             type = lib.types.str;
@@ -41,64 +41,59 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    # ------------------------
-    # Systemd services
-    # ------------------------
-    systemd.services = lib.mapAttrs'
-      (clientName: clientCfg: {
-        name = "borg-backup-${clientName}";
-        value = {
-          description = "Borg backup job for ${clientName}";
-          serviceConfig = {
-            Type = "oneshot";
-            ExecStart = pkgs.writeShellScript "borg-backup-${clientName}" ''
-              #!${pkgs.bash}/bin/bash
-              set -euo pipefail
+    # Filter: Only create services for the client matching this machine's hostname
+    systemd.services = let 
+      relevantClients = lib.filterAttrs (n: _: n == config.networking.hostName) cfg.clients;
+    in lib.mapAttrs' (clientName: clientCfg: {
+      name = "borg-backup-${clientName}";
+      value = {
+        description = "Borg backup job for ${clientName}";
+        serviceConfig = {
+          Type = "oneshot";
+          User = "mike";        # Vital: Runs as you to access your SSH keys
+          Group = "users";
+          ExecStart = pkgs.writeShellScript "borg-backup-${clientName}" ''
+            #!${pkgs.bash}/bin/bash
+            set -euo pipefail
 
-              # Set the Borg passphrase
-              export BORG_PASSPHRASE="$(${cfg.passphraseCommand} ${clientName})"
+            # Use your specific SSH key
+            export BORG_RSH="${pkgs.openssh}/bin/ssh -i /home/mike/.ssh/id_ed25519 -o StrictHostKeyChecking=accept-new"
+            
+            # Fetch passphrase via the configured command
+            export BORG_PASSPHRASE="$(${cfg.passphraseCommand})"
+            
+            TIMESTAMP=$(date +%Y-%m-%d_%H-%M-%S)
 
-              # Timestamp for the archive
-              TIMESTAMP=$(date +%Y-%m-%d_%H-%M-%S)
+            echo "=== Starting backup for ${clientName} at $TIMESTAMP ==="
 
-              echo "=== Starting backup for ${clientName} at \$TIMESTAMP ==="
+            ${pkgs.borgbackup}/bin/borg create \
+              --verbose --stats --compression zstd \
+              ${clientCfg.repo}::"${clientName}-backup-$TIMESTAMP" \
+              ${lib.concatStringsSep " " clientCfg.paths}
 
-              # Run borg create
-              ${pkgs.borgbackup}/bin/borg create \
-                --verbose --stats --compression zstd \
-                ${clientCfg.repo}::"${clientName}-backup-\$TIMESTAMP" \
-                ${lib.concatStringsSep " " clientCfg.paths}
-
-              # Prune old backups
-              ${pkgs.borgbackup}/bin/borg prune \
-                --keep-last 7 --keep-daily 7 --keep-weekly 4 --keep-monthly 6 \
-                ${clientCfg.repo}
-
-              echo "=== Backup complete for ${clientName} ==="
-            '';
-          };
-
-          wants = [ "network-online.target" ];
-          after = [ "network-online.target" ];
+            ${pkgs.borgbackup}/bin/borg prune \
+              --keep-last 7 --keep-daily 7 --keep-weekly 4 --keep-monthly 6 \
+              ${clientCfg.repo}
+          '';
         };
-      })
-      cfg.clients;
+        wants = [ "network-online.target" ];
+        after = [ "network-online.target" ];
+      };
+    }) relevantClients;
 
-    # ------------------------
-    # Systemd timers
-    # ------------------------
-    systemd.timers = lib.mapAttrs'
-      (clientName: clientCfg: {
-        name = "borg-backup-${clientName}";
-        value = {
-          description = "Timer for borg-backup-${clientName}";
-          wantedBy = [ "timers.target" ];
-          timerConfig = {
-            OnCalendar = clientCfg.schedule;
-            Persistent = true;
-          };
+    # Timers (Filtered the same way)
+    systemd.timers = let 
+      relevantClients = lib.filterAttrs (n: _: n == config.networking.hostName) cfg.clients;
+    in lib.mapAttrs' (clientName: clientCfg: {
+      name = "borg-backup-${clientName}";
+      value = {
+        description = "Timer for borg-backup-${clientName}";
+        wantedBy = [ "timers.target" ];
+        timerConfig = {
+          OnCalendar = clientCfg.schedule;
+          Persistent = true;
         };
-      })
-      cfg.clients;
+      };
+    }) relevantClients;
   };
 }

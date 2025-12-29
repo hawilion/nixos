@@ -32,6 +32,7 @@ in
   # ------------------------------------------------
   networking = {
     networkmanager.enable = true;
+    hostName = "lenovo";
 
     interfaces.enp0s25.ipv4.addresses = [
       { address = "192.168.79.80"; prefixLength = 24; }
@@ -72,48 +73,73 @@ in
     curl wget parted util-linux age go syncthing xsane nmap
     plocate neovim logseq nextcloud-client libnotify yq imagemagick
     img2pdf zenity sane-backends sane-airscan sane-frontends brscan4
-    vim imagemagick brave kdePackages.kconfig qt6.qttools git
-
+    vim brave kdePackages.kconfig qt6.qttools git pavucontrol
   ];
- 
+  
   # ------------------------------------------------
   # PROGRAMS
   # ------------------------------------------------
   programs = {
     firefox.enable = true;
     ssh.startAgent = true;
-    git.enable = true; 
+    git.enable = true;  
   };
-#   programs.bash = {
- # enable = true;
-  #promptInit = ''
-   #  if [ "$EUID" -eq 0 ]; then
-    #    PS1="\[\e[31m\]\u@\h\[\e[0m\]:\[\e[34m\]\w\[\e[0m\]\# "
-   # else
-    #    PS1="\[\e[32m\]\u@\h\[\e[0m\]:\[\e[34m\]\w\[\e[0m\]\$ "
-   # fi
-  #'';
-#};
 
   # ------------------------------------------------
-  # HARDWARE / SCANNER
+  # HARDWARE / SCANNER / FIRMWARE
   # ------------------------------------------------
   hardware.sane = {
     enable = true;
     extraBackends = [ pkgs.brscan4 ];
   };
 
+  # Disable PulseAudio so PipeWire can take the hardware
+  hardware.pulseaudio.enable = false;
+  hardware.enableAllFirmware = true;
+
   # ------------------------------------------------
   # SERVICES
   # ------------------------------------------------
+  
+  # Audio priority for PipeWire
+  security.rtkit.enable = true;
+
   services = {
     xserver.enable = true;
     displayManager.sddm.enable = true;
     desktopManager.plasma6.enable = true;
 
-    pipewire.enable = true;
-    pipewire.alsa.enable = true;
-    pipewire.pulse.enable = true;
+    # PIPEWIRE AUDIO CONFIGURATION
+    pipewire = {
+      enable = true;
+      alsa.enable = true;
+      alsa.support32Bit = true;
+      pulse.enable = true;
+      
+      # Lenovo Speaker Fix: Disables UCM which often breaks routing on ThinkPads/Legions
+      wireplumber.extraConfig."10-no-ucm" = {
+        "monitor.alsa.properties" = {
+          "alsa.use-ucm" = false;
+        };
+      };
+    };
+
+    # LOGROTATE (Now correctly nested inside services)
+    logrotate = {
+      enable = true;
+      settings = lib.genAttrs (lib.attrNames backupClients) (clientName:
+        let client = backupClients.${clientName}; in
+        {
+          path = "/var/log/borgbackup-${clientName}.log";
+          rotate = 7;
+          daily = true;
+          compress = true;
+          missingok = true;
+          notifempty = true;
+          copytruncate = true;
+        }
+      );
+    };
 
     avahi = {
       enable = true;
@@ -130,25 +156,9 @@ in
         AllowUsers = [ "mike" ];
       };
     };
-
-    logrotate.enable = true;
-
-    logrotate.settings = lib.genAttrs (lib.attrNames backupClients) (clientName:
-      let client = backupClients.${clientName}; in
-      {
-        path = "/var/log/borgbackup-${clientName}.log";
-        rotate = 7;
-        daily = true;
-        compress = true;
-        missingok = true;
-        notifempty = true;
-        copytruncate = true;
-      }
-    );
   };
 
   # ------------------------------------------------
-  
   # TMPFILES CLEANUP
   # ------------------------------------------------
   systemd.tmpfiles.rules = [
@@ -191,8 +201,8 @@ in
   };
 
   environment.etc."profile.d/custom-path.sh".text = ''
-  export PATH=$HOME/bin:$PATH
-'';
+    export PATH=$HOME/bin:$PATH
+  '';
 
   # ------------------------------------------------
   # NEOVIM CONFIG
@@ -205,9 +215,8 @@ in
     chown -R mike:users /home/mike/.config/nvim
   '';
 
-
   # ------------------------------------------------
   # STATE VERSION
   # ------------------------------------------------
-  system.stateVersion = "25.05";
+  system.stateVersion = "25.05"; 
 }
