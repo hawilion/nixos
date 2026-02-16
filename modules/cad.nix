@@ -2,11 +2,20 @@
 
 {
   environment.systemPackages = with pkgs; [
-    unstable.freecad
+    # Wrapped FreeCAD to fix the disappearing Task Panel on Wayland
+    (symlinkJoin {
+      name = "freecad-wrapped";
+      paths = [ unstable.freecad ];
+      nativeBuildInputs = [ makeWrapper ];
+      postBuild = ''
+        wrapProgram $out/bin/FreeCAD --set QT_QPA_PLATFORM xcb
+      '';
+    })
+
     git
     python312Packages.gitpython
-    
-    # Standard CAD tools (no extra fluff to break the build)
+     
+    # Standard CAD tools
     openscad
     calculix-ccx
     gmsh

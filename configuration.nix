@@ -16,6 +16,7 @@ in
     ./modules/hardware-configuration.nix
     ./modules/borg-backup.nix
     ./modules/printers.nix
+    ./modules/syncthing.nix
   ];
 
   # ------------------------------------------------
@@ -100,7 +101,24 @@ in
   # ------------------------------------------------
   # SERVICES
   # ------------------------------------------------
-  
+services.libinput = {
+    enable = true;
+
+    # Touchpad settings
+    touchpad = {
+      tapping = true;
+      naturalScrolling = true;
+      disableWhileTyping = true;
+      clickMethod = "clickfinger"; # Modern style: 2 fingers for right-click
+      accelSpeed = "0.0";           # Range is -1.0 to 1.0 (0 is default)
+    };
+
+    # Mouse/Trackpoint settings
+    mouse = {
+      accelProfile = "flat";       # Disables mouse acceleration for more precision
+      accelSpeed = "0.0";
+    };
+  }; 
   # Audio priority for PipeWire
   security.rtkit.enable = true;
 
