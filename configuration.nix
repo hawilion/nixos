@@ -17,6 +17,7 @@ in
     ./modules/borg-backup.nix
     ./modules/printers.nix
     ./modules/syncthing.nix
+    ./modules/libreoffice-minimal.nix 
   ];
 
   # ------------------------------------------------
@@ -126,7 +127,7 @@ services.libinput = {
     xserver.enable = true;
     displayManager.sddm.enable = true;
     desktopManager.plasma6.enable = true;
-
+    libreoffice-minimal.enable = true;
     # PIPEWIRE AUDIO CONFIGURATION
     pipewire = {
       enable = true;
