@@ -6,9 +6,10 @@
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     sops-nix.url = "github:Mic92/sops-nix";
     sops-nix.inputs.nixpkgs.follows = "nixpkgs";
+    nix-flatpak.url = "github:gmodena/nix-flatpak";
   };
 
-  outputs = { self, nixpkgs, nixpkgs-unstable, sops-nix, ... }@inputs:
+  outputs = { self, nixpkgs, nixpkgs-unstable, sops-nix, nix-flatpak, ... }@inputs:
     let
       system = "x86_64-linux";
       unstable = import nixpkgs-unstable { 
@@ -28,7 +29,9 @@
           ./modules/borg-backup.nix
           ./modules/scripts.nix
           sops-nix.nixosModules.sops # Correctly referencing the input
-        ];
+          nix-flatpak.nixosModules.nix-flatpak
+
+       ];
       };
     };
 }

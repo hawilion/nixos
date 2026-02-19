@@ -17,7 +17,8 @@ in
     ./modules/borg-backup.nix
     ./modules/printers.nix
     ./modules/syncthing.nix
-    ./modules/libreoffice-minimal.nix 
+    ./modules/libreoffice-minimal.nix
+ #   ./modules/ollama.nix 
   ];
 
   # ------------------------------------------------
@@ -75,7 +76,7 @@ in
     curl wget parted util-linux age go syncthing xsane nmap
     plocate neovim logseq nextcloud-client libnotify yq imagemagick
     img2pdf zenity sane-backends sane-airscan sane-frontends brscan4
-    vim brave kdePackages.kconfig qt6.qttools git pavucontrol
+    vim brave kdePackages.kconfig qt6.qttools git pavucontrol ollama
   ];
   
   # ------------------------------------------------
@@ -128,12 +129,16 @@ services.libinput = {
     displayManager.sddm.enable = true;
     desktopManager.plasma6.enable = true;
     libreoffice-minimal.enable = true;
-    # PIPEWIRE AUDIO CONFIGURATION
+    flatpak.enable = true;   
+
+
+  # PIPEWIRE AUDIO CONFIGURATION
     pipewire = {
       enable = true;
       alsa.enable = true;
       alsa.support32Bit = true;
       pulse.enable = true;
+
       
       # Lenovo Speaker Fix: Disables UCM which often breaks routing on ThinkPads/Legions
       wireplumber.extraConfig."10-no-ucm" = {
