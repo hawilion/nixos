@@ -18,7 +18,6 @@ in
     ./modules/printers.nix
     ./modules/syncthing.nix
     ./modules/libreoffice-minimal.nix
- #   ./modules/ollama.nix 
   ];
 
   # ------------------------------------------------
@@ -76,7 +75,7 @@ in
     curl wget parted util-linux age go syncthing xsane nmap
     plocate neovim logseq nextcloud-client libnotify yq imagemagick
     img2pdf zenity sane-backends sane-airscan sane-frontends brscan4
-    vim brave kdePackages.kconfig qt6.qttools git pavucontrol ollama
+    vim brave kdePackages.kconfig qt6.qttools git pavucontrol sof-firmware 
   ];
   
   # ------------------------------------------------
@@ -91,14 +90,14 @@ in
   # ------------------------------------------------
   # HARDWARE / SCANNER / FIRMWARE
   # ------------------------------------------------
+  
+ # This ensures the kernel has the "brain" for your Lenovo sound chip
+  hardware.enableAllFirmware = true;
   hardware.sane = {
     enable = true;
     extraBackends = [ pkgs.brscan4 ];
   };
 
-  # Disable PulseAudio so PipeWire can take the hardware
-  hardware.pulseaudio.enable = false;
-  hardware.enableAllFirmware = true;
 
   # ------------------------------------------------
   # SERVICES
@@ -133,21 +132,34 @@ services.libinput = {
 
 
   # PIPEWIRE AUDIO CONFIGURATION
-    pipewire = {
-      enable = true;
-      alsa.enable = true;
-      alsa.support32Bit = true;
-      pulse.enable = true;
+     # 1. Disable PulseAudio to avoid conflicts
+  services.pulseaudio.enable = false;
 
-      
-      # Lenovo Speaker Fix: Disables UCM which often breaks routing on ThinkPads/Legions
-      wireplumber.extraConfig."10-no-ucm" = {
-        "monitor.alsa.properties" = {
-          "alsa.use-ucm" = false;
-        };
+  # 2. Real-time priority for audio (prevents crackling)
+  security.rtkit.enable = true;
+
+  # 3. The PipeWire Service
+  services.pipewire = {
+    enable = true;
+    alsa.enable = true;
+    alsa.support32Bit = true;
+    pulse.enable = true;
+    
+    # WirePlumber is the "Brain" that finds your speakers
+    wireplumber.enable = true;
+    
+    # This extra config forces WirePlumber to look for hidden Lenovo speakers
+    wireplumber.extraConfig = {
+      "10-disable-camera" = {
+        "monitor.alsa.rules" = [
+          {
+            matches = [ { "node.name" = "~alsa_input.pci.*"; } ];
+            actions = { "update-props" = { "node.disabled" = false; }; };
+          }
+        ];
       };
     };
-
+  };
     # LOGROTATE (Now correctly nested inside services)
     logrotate = {
       enable = true;
@@ -211,7 +223,10 @@ services.libinput = {
   # ------------------------------------------------
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
-
+  boot.kernelParams = [ 
+  "snd_intel_dspcfg.dsp_driver=3" 
+  "snd_hda_intel.model=dual-codecs" # Common fix for Lenovo dual-speaker setups
+];
   # ------------------------------------------------
   # NIX SETTINGS
   # ------------------------------------------------
