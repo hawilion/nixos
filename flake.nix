@@ -2,7 +2,9 @@
   description = "Lenovo NixOS configuration with FreeCAD forced to unstable";
 
   inputs = {
+    #main stable branch
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
+    #ustable branch for latest tools
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     sops-nix.url = "github:Mic92/sops-nix";
     sops-nix.inputs.nixpkgs.follows = "nixpkgs";
@@ -28,6 +30,7 @@
           ./modules/cad.nix
           ./modules/borg-backup.nix
           ./modules/scripts.nix
+          ./modules/ai.nix
           sops-nix.nixosModules.sops # Correctly referencing the input
           nix-flatpak.nixosModules.nix-flatpak
 
