@@ -31,14 +31,30 @@ hardware.nvidia = {
   };
 
 services.ollama = {
-    enable = true;
-    acceleration = "cuda";
-    # Force the use of the CUDA-enabled package
-    package = lib.mkForce pkgs.ollama-cuda;
+  enable = true;
+  acceleration = "cuda";
+  # Tweak: Prevent Ollama from hogging all CPU threads
+  # Change '4' to half of your total CPU threads if you have a powerful chip
+  environmentVariables = {
+    OLLAMA_NUM_PARALLEL = "1"; 
+    # This ensures it doesn't try to run multiple models at once on the CPU
   };
+environmentVariables = {
+    # 1. Unload from GPU after 5 minutes of inactivity
+      OLLAMA_KEEP_ALIVE = "5m";
+      # 2. Limit the number of threads Ollama can spawn
+      OMP_NUM_THREADS = "4";
+  };
+};
 
   # This allows your user 'mike' to talk to the Ollama service
   users.users.mike.extraGroups = [ "ollama" ];
+environment.shellAliases = {
+    # The 'Panic Button'
+    stop-ai = "sudo systemctl stop ollama && pkill -9 .ollama-wrapped";
+    # The 'Resume' button
+    start-ai = "sudo systemctl start ollama";
+  };
 
 #Borg Backup Configuration
 borgBackup = {
