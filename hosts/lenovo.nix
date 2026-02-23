@@ -1,22 +1,29 @@
 { config, lib, pkgs, ... }:
 
+let
+  # Import your client database
+  allClients = import ../clients/default.nix;
+in
 {
   networking.hostName = "lenovo";
 
-  # Enable NVIDIA drivers
+  imports = [
+    ../hardware-configuration.nix
+    ../modules/ai.nix           # Pulls in Ollama + WebUI + NVIDIA optimizations
+    ../modules/borg-backup.nix  # Pulls in the Systemd backup logic
+  ];
+
+  # ─── NVIDIA & GRAPHICS ──────────────────────────────────────────────────
+  # This stays here because it's specific to the Lenovo's physical hardware
   hardware.graphics.enable = true;
   services.xserver.videoDrivers = ["nvidia"];
 
-hardware.nvidia = {
-    # 1. Force the proprietary driver (MUCH more stable for Laptop 3050s)
+  hardware.nvidia = {
     open = false; 
-
-    # 2. Critical for Raptor Lake power management
     modesetting.enable = true;
     powerManagement.enable = true;
-    powerManagement.finegrained = true; # Allows the GPU to sleep when not in use
+    powerManagement.finegrained = true; # Critical for battery life
 
-    # 3. Use the stable production driver
     package = config.boot.kernelPackages.nvidiaPackages.stable;
 
     prime = {
@@ -24,64 +31,35 @@ hardware.nvidia = {
         enable = true;
         enableOffloadCmd = true;
       };
-      # These now match your lspci output exactly
       intelBusId = "PCI:0:2:0";
       nvidiaBusId = "PCI:1:0:0";
     };
   };
 
-services.ollama = {
-  enable = true;
-  acceleration = "cuda";
-  # Tweak: Prevent Ollama from hogging all CPU threads
-  # Change '4' to half of your total CPU threads if you have a powerful chip
-  environmentVariables = {
-    OLLAMA_NUM_PARALLEL = "1"; 
-    # This ensures it doesn't try to run multiple models at once on the CPU
-  };
-environmentVariables = {
-    # 1. Unload from GPU after 5 minutes of inactivity
-      OLLAMA_KEEP_ALIVE = "5m";
-      # 2. Limit the number of threads Ollama can spawn
-      OMP_NUM_THREADS = "4";
-  };
-};
-
-  # This allows your user 'mike' to talk to the Ollama service
+  # ─── AI MODULE DATA ─────────────────────────────────────────────────────
+  # Note: The 'services.ollama' and 'services.open-webui' blocks are 
+  # now inside modules/ai.nix. We only put Lenovo-specific tweaks here.
+  
   users.users.mike.extraGroups = [ "ollama" ];
-environment.shellAliases = {
-    # The 'Panic Button'
+
+  environment.shellAliases = {
     stop-ai = "sudo systemctl stop ollama && pkill -9 .ollama-wrapped";
-    # The 'Resume' button
     start-ai = "sudo systemctl start ollama";
   };
 
-services.open-webui = {
+  # ─── BORG BACKUP DATA ───────────────────────────────────────────────────
+  # We use the 'options' we created in modules/borg-backup.nix
+  borgBackup = {
     enable = true;
-    port = 8080;
-    openFirewall = true; # Allow access from other devices on your LAN
-    environment = {
-      # This points the UI to your local Ollama instance
-      OLLAMA_API_BASE_URL = "http://127.0.0.1:11434";
-      ANONYMIZED_TELEMETRY = "False";
-      DO_NOT_TRACK = "True";
+    # Uses the path from your secrets folder we created
+    passphraseCommand = "cat /etc/nixos/secrets/borg-passphrase";
+    
+    # Pull the specific 'lenovo' data from your clients/default.nix
+    clients = {
+      lenovo = allClients.lenovo // {
+        # We add the WebUI database to the paths here
+        paths = allClients.lenovo.paths ++ [ "/var/lib/open-webui" ];
+      };
     };
-  };
-
-#Borg Backup Configuration
-borgBackup = {
-    enable = true;
-    clients.lenovo = {
-      paths = [ 
-        "/home/mike" 
-        "/etc/nixos"
-        "/var/lib/open-webui"
-      ];
-      # Added mkForce here to override the value in configuration.nix
-      repo = lib.mkForce "mike@192.168.79.72:/home/mike/backups/lenovo-repo";
-      schedule = "02:00:00"; 
-    };
-    # You already have this forced from the previous step
-    passphraseCommand = lib.mkForce "${pkgs.coreutils}/bin/cat /etc/borg-passphrase";
   };
 }
