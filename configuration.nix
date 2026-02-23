@@ -139,7 +139,7 @@ in
   # ------------------------------------------------
   users.users.mike = {
     isNormalUser = true;
-    extraGroups = [ "networkmanager" "wheel" "lp" "scanner" "audio" "video" ];
+    extraGroups = [ "networkmanager" "wheel" "lp" "scanner" "audio" "video" "open-webui" ];
     packages = with pkgs; [
       kdePackages.kate
       kdePackages.kde-cli-tools

@@ -1,0 +1,53 @@
+{ config, lib, pkgs, ... }:
+
+{
+  networking.hostName = "lenovo";
+# Force kernel modules to load at boot
+  boot.initrd.kernelModules = [ "nvidia" "nvidia_modeset" "nvidia_uvm" "nvidia_drm" ];
+  
+  # Ensure we are using a stable kernel that plays nice with NVIDIA
+  boot.kernelPackages = pkgs.linuxPackages_latest;
+
+  # Enable NVIDIA drivers
+  hardware.graphics.enable = true;
+  services.xserver.videoDrivers = ["nvidia"];
+
+  hardware.nvidia = {
+    # 3050 supports the 'open' kernel module (Turing or newer)
+    # If 'true' fails, try setting this to 'false' to use the proprietary one
+    open = true;
+    modesetting.enable = true;
+    powerManagement.enable = true; 
+    open = false; 
+    nvidiaSettings = true;
+    
+   # PRIME settings (Verify these IDs with 'lspci | grep VGA')
+    prime = {
+      offload = {
+        enable = true;
+        enableOffloadCmd = true;
+      };
+      # Example IDs (common for Lenovo laptops)
+      intelBusId = "PCI:0:2:0";
+      nvidiaBusId = "PCI:1:0:0";
+    };
+  };
+
+# Borg Backup Configuration
+borgBackup = {
+    enable = true;
+    # Points to your server at 192.168.79.72
+    clients.lenovo = {
+      paths = [ "/home/mike" 
+                "/etc/nixos"
+                "/var/lib/open-webui" # Your "Private Gemini" chat history/settings
+              # "/var/lib/ollama"   # Optional: The AI models themselves (warning: very large!)
+
+      ];
+      repo = "mike@192.168.79.72:/home/mike/backups/lenovo-repo";
+      schedule = "02:00:00"; # Runs at 2 AM
+    };
+    # This command is executed by the script in your module
+    passphraseCommand = "${pkgs.coreutils}/bin/cat /etc/borg-passphrase";
+  };
+}

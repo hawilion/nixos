@@ -1,29 +1,24 @@
 { config, lib, unstable, ... }:
 
 {
-  # 1. Enable Ollama (The Brain)
+  # Enable Ollama with CUDA support
   services.ollama = {
     enable = true;
-    package = unstable.ollama;
-    # Recommended for Lenovo (Intel/AMD integrated graphics)
-    acceleration = "vulkan"; 
+    acceleration = "cuda"; # Switched from vulkan to cuda for your 3050
   };
 
-  # 2. Enable Open WebUI (The "Private Gemini" Interface)
   services.open-webui = {
     enable = true;
     package = unstable.open-webui;
     port = 8080;
-    host = "127.0.0.1"; # Keeps it strictly on your Lenovo
-    environment = {
-      ANONYMIZED_TELEMETRY = "False";
-      DO_NOT_TRACK = "True";
-      SCARF_NO_ANALYTICS = "True";
-    };
+    host = "127.0.0.1";
   };
 
-  # 3. Security/License (Open WebUI Branding License)
+  # Allow Unfree for NVIDIA and Open WebUI
   nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
     "open-webui"
+    "nvidia-x11"
+    "nvidia-settings"
+    "nvidia-persistenced"
   ];
 }
