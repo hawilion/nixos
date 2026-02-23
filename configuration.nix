@@ -21,7 +21,7 @@ in
   # MODULE IMPORTS
   # ------------------------------------------------
   imports = [
-    ./modules/hardware-configuration.nix
+    ./hardware-configuration.nix
     ./modules/borg-backup.nix
     ./modules/printers.nix
     ./modules/syncthing.nix

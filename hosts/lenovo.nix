@@ -51,9 +51,6 @@ in
   # We use the 'options' we created in modules/borg-backup.nix
   borgBackup = {
     enable = true;
-    # Uses the path from your secrets folder we created
-    passphraseCommand = "cat /etc/nixos/secrets/borg-passphrase";
-    
     # Pull the specific 'lenovo' data from your clients/default.nix
     clients = {
       lenovo = allClients.lenovo // {
