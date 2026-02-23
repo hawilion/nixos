@@ -56,6 +56,18 @@ environment.shellAliases = {
     start-ai = "sudo systemctl start ollama";
   };
 
+services.open-webui = {
+    enable = true;
+    port = 8080;
+    openFirewall = true; # Allow access from other devices on your LAN
+    environment = {
+      # This points the UI to your local Ollama instance
+      OLLAMA_API_BASE_URL = "http://127.0.0.1:11434";
+      ANONYMIZED_TELEMETRY = "False";
+      DO_NOT_TRACK = "True";
+    };
+  };
+
 #Borg Backup Configuration
 borgBackup = {
     enable = true;
