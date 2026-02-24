@@ -48,34 +48,39 @@ in
       name = "borg-backup-${clientName}";
       value = {
         description = "Borg backup job for ${clientName}";
+        
         serviceConfig = {
-          Type = "oneshot";
-          User = "mike";        # Vital: Runs as you to access your SSH keys
-          Group = "users";
-          ExecStart = pkgs.writeShellScript "borg-backup-${clientName}" ''
-            #!${pkgs.bash}/bin/bash
-            set -euo pipefail
+  Type = "oneshot";
+  User = "root";  # <--- Change this from "mike" to "root"
+  Group = "root"; # <--- Change this to "root"
+  
+  ExecStart = pkgs.writeShellScript "borg-backup-${clientName}" ''
+    #!${pkgs.bash}/bin/bash
+    set -euo pipefail
 
-            # Use your specific SSH key
-            export BORG_RSH="${pkgs.openssh}/bin/ssh -i /home/mike/.ssh/id_ed25519 -o StrictHostKeyChecking=accept-new"
-            
-            # Fetch passphrase via the configured command
-            export BORG_PASSPHRASE="$(${cfg.passphraseCommand})"
-            
-            TIMESTAMP=$(date +%Y-%m-%d_%H-%M-%S)
+    # 1. Use the ROOT ssh key (we know this one is passwordless now)
+    export BORG_RSH="${pkgs.openssh}/bin/ssh -i /root/.ssh/id_ed25519 -o StrictHostKeyChecking=accept-new"
 
-            echo "=== Starting backup for ${clientName} at $TIMESTAMP ==="
+    # 2. Fetch passphrase (root has permission to 'cat' this)
+    # Adding 'tr' ensures no hidden newlines break the password
+    export BORG_PASSPHRASE="$(${cfg.passphraseCommand} | ${pkgs.coreutils}/bin/tr -d '\n ')"
 
-            ${pkgs.borgbackup}/bin/borg create \
-              --verbose --stats --compression zstd \
-              ${clientCfg.repo}::"${clientName}-backup-$TIMESTAMP" \
-              ${lib.concatStringsSep " " clientCfg.paths}
+    TIMESTAMP=$(date +%Y-%m-%d_%H-%M-%S)
 
-            ${pkgs.borgbackup}/bin/borg prune \
-              --keep-last 7 --keep-daily 7 --keep-weekly 4 --keep-monthly 6 \
-              ${clientCfg.repo}
-          '';
-        };
+    echo "=== Starting backup for ${clientName} at $TIMESTAMP ==="
+
+    # 3. Create the backup
+    ${pkgs.borgbackup}/bin/borg create \
+      --verbose --stats --compression zstd \
+      ${clientCfg.repo}::"${clientName}-backup-$TIMESTAMP" \
+      ${lib.concatStringsSep " " clientCfg.paths}
+
+    # 4. Prune old backups
+    ${pkgs.borgbackup}/bin/borg prune \
+      --keep-last 7 --keep-daily 7 --keep-weekly 4 --keep-monthly 6 \
+      ${clientCfg.repo}
+  '';
+}; 
         wants = [ "network-online.target" ];
         after = [ "network-online.target" ];
       };

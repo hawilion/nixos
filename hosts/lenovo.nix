@@ -55,7 +55,7 @@ in
     clients = {
       lenovo = allClients.lenovo // {
         # We add the WebUI database to the paths here
-        paths = allClients.lenovo.paths ++ [ "/var/lib/open-webui" ];
+        paths = allClients.lenovo.paths;
       };
     };
   };

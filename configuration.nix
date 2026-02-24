@@ -131,7 +131,7 @@ in
   borgBackup = {
     enable = true;
     clients = backupClients;
-    passphraseCommand = "/root/bin/get-borg-pass.sh";
+    passphraseCommand = "cat /etc/secrets/borg_passphrase";
   };
 
   # ------------------------------------------------
@@ -156,6 +156,20 @@ in
     imagemagick img2pdf zenity vim brave git pavucontrol 
     sof-firmware alsa-utils
   ];
+
+
+   sops = {
+  defaultSopsFile = ./secrets/secrets.yaml; # Ensure this points to your file
+  age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
+  
+  # This tells NixOS: "Go into secrets.yaml, find borg_passphrase, 
+  # and put it in /run/secrets/borg_passphrase"
+  secrets.borg_passphrase = {
+    owner = "root";
+  };
+};
+
+ 
 
   # ------------------------------------------------
   # SYSTEMD SERVICES & TMPFILES
