@@ -14,7 +14,7 @@ services.borgbackup.jobs."${config.networking.hostName}" = {
   exclude = [ "**/.cache" "**/Downloads" ];
   user = "mike";
   
-  repo = "user@ip:/path/to/repo"; 
+  repo = "mike@192.168.79.72:/mnt/backupdisk/borg/lenovo";
   
   # Timer and scheduling settings
   startAt = "daily";
