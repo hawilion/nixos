@@ -16,6 +16,12 @@ services.borgbackup.jobs."${config.networking.hostName}" = {
   
   repo = "user@ip:/path/to/repo"; 
   
+  # Timer and scheduling settings
+  startAt = "daily";
+#  timerOptions = {
+  persistentTimer = true;  # This ensures the job runs if it missed the scheduled time
+# };
+  
   encryption = {
     mode = "repokey-blake2";
     # This reads the decrypted secret directly from the sops-nix managed file
@@ -27,7 +33,6 @@ services.borgbackup.jobs."${config.networking.hostName}" = {
   };
 
   compression = "auto,zstd";
-  startAt = "daily";
   
   prune = {
     keep = {
@@ -37,6 +42,9 @@ services.borgbackup.jobs."${config.networking.hostName}" = {
     };
   };
 };
+
+  
+
 
   # 3. Syncthing Config
  # services.syncthing = {
