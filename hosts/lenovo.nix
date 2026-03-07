@@ -1,5 +1,11 @@
 { config, lib, pkgs, ... }:
+{
+  # ... imports and other settings ...
 
+  boot.kernelParams = [
+    "snd_intel_dspcfg.dsp_driver=3"
+    "snd_hda_intel.model=dual-codecs"
+  ];
 let
   # Import your client database here so it's available to the rest of the file
   allClients = import ../clients/default.nix;

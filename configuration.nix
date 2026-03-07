@@ -33,10 +33,6 @@ in
   # ------------------------------------------------
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
-  boot.kernelParams = [  
-    "snd_intel_dspcfg.dsp_driver=3"    # Forces SOF driver for Raptor Lake
-    "snd_hda_intel.model=dual-codecs" # Lenovo speaker routing fix
-  ];
 
   # ------------------------------------------------
   # HARDWARE / FIRMWARE / SCANNER
@@ -52,7 +48,7 @@ in
   # ------------------------------------------------
   networking = {
     networkmanager.enable = true;
-    hostName = "lenovo";
+    #hostName = "lenovo";
     interfaces.enp0s25.ipv4.addresses = [
       { address = "192.168.79.80"; prefixLength = 24; }
     ];
