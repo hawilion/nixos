@@ -1,18 +1,17 @@
 { config, lib, pkgs, ... }:
 
 let
-  # Import your client database
+  # Import your client database here so it's available to the rest of the file
   allClients = import ../clients/default.nix;
 in
 {
   networking.hostName = "lenovo";
 
   imports = [
-    ../hardware-configuration.nix
-    ../modules/ai.nix           # Pulls in Ollama + WebUI + NVIDIA optimizations
-    ../modules/borg-backup.nix  # Pulls in the Systemd backup logic
+    ../hardware-lenovo.nix
+    ../modules/ai.nix
+    ../modules/borg-backup.nix
   ];
-
   # ─── NVIDIA & GRAPHICS ──────────────────────────────────────────────────
   # This stays here because it's specific to the Lenovo's physical hardware
   hardware.graphics.enable = true;
