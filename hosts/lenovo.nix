@@ -49,14 +49,14 @@ in
 
   # ─── BORG BACKUP DATA ───────────────────────────────────────────────────
   # We use the 'options' we created in modules/borg-backup.nix
-  borgBackup = {
-    enable = true;
+ # borgBackup = {
+  #  enable = true;
     # Pull the specific 'lenovo' data from your clients/default.nix
-    clients = {
-      lenovo = allClients.lenovo // {
+   # clients = {
+    #  lenovo = allClients.lenovo // {
         # We add the WebUI database to the paths here
-        paths = allClients.lenovo.paths;
-      };
-    };
-  };
+     #   paths = allClients.lenovo.paths;
+      #};
+    #};
+  #};
 }

@@ -1,1 +1,0 @@
-/home/mike/bin/borg-backup-hp.sh

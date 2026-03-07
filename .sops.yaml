@@ -1,5 +1,5 @@
 creation_rules:
-  - path_regex: secrets/secrets.yaml$
+  - path_regex: .*
     key_groups:
       - age:
           - "age1jg2g65fdvyzs7dlek3fq7v63uh3d0765rgrqj4larhk8ky6jry2qu5tys9"

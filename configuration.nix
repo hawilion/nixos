@@ -128,11 +128,12 @@ in
   # ------------------------------------------------
   # BORG BACKUP
   # ------------------------------------------------
-  borgBackup = {
-    enable = true;
-    clients = backupClients;
-    passphraseCommand = "cat /etc/secrets/borg_passphrase";
-  };
+  #borgBackup = {
+   # enable = true; # Uncomment this to turn it on!
+    #clients = backupClients;
+    # IMPORTANT: Use /run/secrets/ instead of /etc/secrets/
+    #passphraseCommand = "cat /run/secrets/borg_passphrase";
+ # };
 
   # ------------------------------------------------
   # USERS
@@ -156,20 +157,19 @@ in
     imagemagick img2pdf zenity vim brave git pavucontrol 
     sof-firmware alsa-utils
   ];
-
-
-   sops = {
-  defaultSopsFile = ./secrets/secrets.yaml; # Ensure this points to your file
-  age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
-  
-  # This tells NixOS: "Go into secrets.yaml, find borg_passphrase, 
-  # and put it in /run/secrets/borg_passphrase"
-  secrets.borg_passphrase = {
-    owner = "root";
-  };
+  environment.sessionVariables = {
+  SOPS_AGE_KEY_FILE = "/home/mike/.config/sops/age/keys.txt";
 };
 
- 
+sops = {
+  defaultSopsFile = ./secrets/secrets.yaml;
+  age.keyFile = "/home/mike/.config/sops/age/keys.txt";
+
+  secrets."borg_passphrase" = {  
+    owner = "mike";
+  };
+  secrets."syncthing-gui-password" = {};
+};   
 
   # ------------------------------------------------
   # SYSTEMD SERVICES & TMPFILES

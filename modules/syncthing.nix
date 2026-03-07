@@ -1,28 +1,34 @@
 { config, pkgs, lib, ... }:
 
-let
-  secrets = config.sops.secrets;
-in
 {
+  # 1. Define the secret for this module
+  # This matches the key in your secrets.yaml
+
+  sops.secrets."syncthing-gui-password" = {
+  owner = "mike";
+  # Optional: ensure only your user group can read it
+  group = "users"; 
+  mode = "0400";
+};
+
   # Networking
   networking.firewall.allowedTCPPorts = [ 8384 22000 ];
   networking.firewall.allowedUDPPorts = [ 22000 21027 ];
 
   services.syncthing = {
-  enable = true;
-  user = "mike";
-  group = "users";
-  
-  # Keep these as you have them
-  dataDir = "/home/mike/.local/state/syncthing";
-  configDir = "/home/mike/.config/syncthing";
+    enable = true;
+    user = "mike";
+    group = "users";
+    
+    # Path settings
+    dataDir = "/home/mike/.local/state/syncthing";
+    configDir = "/home/mike/.config/syncthing";
 
-  # Point these to the "source" files you just found with ls
-  cert = "/home/mike/syncthing/cert.pem";
-  key  = "/home/mike/syncthing/key.pem";
+    # SSL Certificates
+    cert = "/home/mike/syncthing/cert.pem";
+    key  = "/home/mike/syncthing/key.pem";
 
-
-    overrideDevices = false; 
+    overrideDevices = false;  
     overrideFolders = false;
 
     settings = {
@@ -39,30 +45,32 @@ in
       gui = {
         address = "0.0.0.0:8384";
         user = "mike";
-       # passwordFile = secrets."syncthing-gui-password".path;
+        # 2. Wire in the secret password file from SOPS
+        passwordFile = config.sops.secrets."syncthing-gui-password".path;
       };
 
       devices = {
         "hp" = { id = "YFFNFOZ-WAWKGY5-BM3P3HM-EEEQTR5-PLYYUVQ-3ZLMNRG-5KJZRJH-4OCZTA6"; };
         "pixel10" = { id = "SFARPSJ-2BWOM56-TEGSLNE-RGZ4Q62-TGBVOSM-FF46EVT-FB32HU7-YOLOWAK"; };
-        "lenovo" = { id = "YFFNFOZ-WAWKGY5-BM3P3HM-EEEQTR5-PLYYUVQ-3ZLMNRG-5KJZRJH-4OCZTA6"; }; # Keep commented until you have the ID
+        "lenovo" = { id = "YFFNFOZ-WAWKGY5-BM3P3HM-EEEQTR5-PLYYUVQ-3ZLMNRG-5KJZRJH-4OCZTA6"; }; 
       };
 
       folders = {
-        "mlog" = { 
-          path = "/home/mike/mlog"; 
-          devices = [ "pixel10" ]; 
-          id = "ghirq-khoky"; 
+        "mlog" = {  
+          path = "/home/mike/mlog";  
+          devices = [ "pixel10" ];  
+          id = "ghirq-khoky";  
         };
-        "Camera" = { 
-          path = "/home/mike/Camera"; 
-          devices = [ "pixel10" ]; 
-          id = "5eiix-mjsab"; 
-          ignorePerms = false; 
+        "Camera" = {  
+          path = "/home/mike/Camera";  
+          devices = [ "pixel10" ];  
+          id = "5eiix-mjsab";  
+          ignorePerms = false;  
         };
       };
     };
-   };
+  };
+
   # Prevents the "Default Folder" from being created on every new device
   systemd.services.syncthing.environment.STNODEFAULTFOLDER = "true";
 }
