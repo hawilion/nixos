@@ -25,6 +25,5 @@ programs.bash.shellAliases = {
   writer = "libreoffice --writer";
     };
 
-};
 }
 
