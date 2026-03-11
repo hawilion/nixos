@@ -17,13 +17,10 @@ in
       PS1="\[\e[32m\]\u@\h\[\e[0m\]:\[\e[34m\]\w\[\e[0m\]\$ "
     fi
   '';
-
-
 programs.bash.shellAliases = {
-  # This automatically detects your machine name and targets the right flake
-  nrf = "sudo nixos-rebuild switch --flake /etc/nixos#$(hostname)";
-  borgmenu = "${scriptDir}/borg-backup.sh";
-  scan = "${scriptDir}/scan.sh";
+  nrf = "sudo nixos-rebuild switch --flake /etc/nixos#lenovo";
+  borgmenu = "borg-backup.sh"; # Just the command name
+  scan = "scan.sh";
 };
 }
 
