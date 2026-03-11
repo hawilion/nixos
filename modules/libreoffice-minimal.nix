@@ -27,10 +27,5 @@ in {
       pkgs.liberation_ttf
     ];
 
-    programs.bash.shellAliases = {
-      "lo" = "libreoffice";
-      "calc" = "libreoffice --calc";
-      "writer" = "libreoffice --writer";
-    };
   };
 }
