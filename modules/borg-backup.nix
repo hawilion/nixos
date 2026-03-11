@@ -1,13 +1,11 @@
 { config, pkgs, lib, ... }:
 
 {
-  # 1. Define the Secret
   sops.secrets.borg_passphrase = {
     owner = "mike";
     mode = "0400";
   };
 
-  # 2. Define the Borg Job
   services.borgbackup.jobs."${config.networking.hostName}" = {
     paths = [ "/home/mike" "/etc/nixos" ];
     exclude = [ "**/.cache" "**/Downloads" ];
@@ -15,7 +13,8 @@
     
     repo = "mike@192.168.79.72:/mnt/backupdisk/borg/${config.networking.hostName}";
     
-    startAt = "daily";
+    # 2:00 PM daily, with persistence so it catches up if you were asleep
+    startAt = "14:00:00";
     persistentTimer = true;
     
     encryption = {
@@ -38,19 +37,15 @@
     };
   };
 
-  # 3. Correctly define systemd dependencies
-
-
-systemd.services."borgbackup-job-lenovo" = {
-  after = [ "network-online.target" ];
-  wants = [ "network-online.target" ];
-  serviceConfig = {
-    Restart = "on-failure";
-    RestartSec = "5min"; # Wait 5 minutes before trying again
-    StartLimitBurst = 3; # Try 3 times total
-    StartLimitIntervalSec = 900; # Over a 15-minute window
+  # Dependency and Retry logic
+  systemd.services."borgbackup-job-lenovo" = {
+    after = [ "network-online.target" ];
+    wants = [ "network-online.target" ];
+    serviceConfig = {
+      Restart = "on-failure";
+      RestartSec = "5min";
+      StartLimitBurst = 3;
+      StartLimitIntervalSec = 900;
+    };
   };
-};
-
-
 }
