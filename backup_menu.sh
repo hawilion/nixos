@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+# Ensure we have root privileges to read /etc, /root, /var/lib, etc.
+if [[ $EUID -ne 0 ]]; then
+   echo "This script must be run as root. Please use: sudo $0"
+   exit 1
+fi
+
 # --- Configuration ---
 # Pointing to your actual flake-based secrets
 export SOPS_AGE_KEY_FILE="/home/mike/sops/age/keys.txt"

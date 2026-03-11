@@ -19,7 +19,7 @@ in
   '';
 programs.bash.shellAliases = {
   nrf = "sudo nixos-rebuild switch --flake /etc/nixos#$(hostname)";
-  backup = "borg-backup.sh"; # Just the command name
+  backup = "sudo borg-backup.sh"; # Just the command name
   scan = "scan.sh";
   calc = "libreoffice --calc";
   writer = "libreoffice --writer";

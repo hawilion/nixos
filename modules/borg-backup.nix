@@ -39,15 +39,18 @@
   };
 
   # 3. Correctly define systemd dependencies
-  systemd.services."borgbackup-job-${config.networking.hostName}" = {
-    # These belong at the top level of the service definition, NOT in serviceConfig
-    after = [ "network-online.target" ];
-    wants = [ "network-online.target" ];
 
-    serviceConfig = {
-      # Running as root ensures permission to read /etc/nixos/secrets
-      # If your backup script uses specific paths, ensure they are absolute
-      #User = "root";
-    };
+
+systemd.services."borgbackup-job-lenovo" = {
+  after = [ "network-online.target" ];
+  wants = [ "network-online.target" ];
+  serviceConfig = {
+    Restart = "on-failure";
+    RestartSec = "5min"; # Wait 5 minutes before trying again
+    StartLimitBurst = 3; # Try 3 times total
+    StartLimitIntervalSec = 900; # Over a 15-minute window
   };
+};
+
+
 }
