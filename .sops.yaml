@@ -1,5 +1,11 @@
+keys:
+  - &lenovo age1jg2g65fdvyzs7dlek3fq7v63uh3d0765rgrqj4larhk8ky6jry2qu5tys9
+  - &hp age1j3y68y2ne5hy6u92tey4wxry955tldq5lw9wskdvfs3up49ncdlqwv4tqf
+
 creation_rules:
-  - path_regex: .*
+  - path_regex: secrets/lenovo\.yaml$
     key_groups:
-      - age:
-          - "age1jg2g65fdvyzs7dlek3fq7v63uh3d0765rgrqj4larhk8ky6jry2qu5tys9"
+      - age: [*lenovo]
+  - path_regex: secrets/hp\.yaml$
+    key_groups:
+      - age: [*hp]

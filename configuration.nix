@@ -158,7 +158,7 @@ in
 };
 
 sops = {
-  defaultSopsFile = ./secrets/secrets.yaml;
+  defaultSopsFile = ./secrets/${config.networking.hostName}.yaml;
   age.keyFile = "/home/mike/.config/sops/age/keys.txt";
 
   secrets."borg_passphrase" = {  

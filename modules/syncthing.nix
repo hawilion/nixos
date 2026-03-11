@@ -45,7 +45,7 @@
       gui = {
         address = "0.0.0.0:8384";
         user = "mike";
-        # 2. Wire in the secret password file from SOPS
+        # 2. Wire in the secret password file from 
         passwordFile = config.sops.secrets."syncthing-gui-password".path;
       };
 
