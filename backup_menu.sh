@@ -3,7 +3,7 @@
 # --- Configuration ---
 # Pointing to your actual flake-based secrets
 export SOPS_AGE_KEY_FILE="/home/mike/sops/age/keys.txt"
-SECRETS_FILE="/etc/nixos/secrets/secrets.yaml"
+SECRETS_FILE="/etc/nixos/secrets/lenovo.yaml"
 # Decrypt the passphrase using SOPS
 export BORG_PASSPHRASE=$(sudo SOPS_AGE_KEY_FILE=$SOPS_AGE_KEY_FILE sops -d --extract '["borg_passphrase"]' $SECRETS_FILE)
 

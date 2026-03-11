@@ -26,6 +26,7 @@ in
     ./modules/printers.nix
     ./modules/syncthing.nix
     ./modules/libreoffice-minimal.nix
+    ./modules/scripts.nix
   ];
 
   # ------------------------------------------------

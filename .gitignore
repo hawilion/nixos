@@ -10,3 +10,11 @@
 # Editor junk
 *.swp
 *.bak
+
+# Secrets folder
+secrets/
+# Any individual yaml files or backups
+*.yaml
+*.bak
+*.key
+*.pem

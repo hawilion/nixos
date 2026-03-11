@@ -18,10 +18,12 @@ in
     fi
   '';
 
-  programs.bash.shellAliases = {
-    nrf = "sudo nixos-rebuild switch --flake /etc/nixos#lenovo";
-    borgmenu = "${scriptDir}/borg-backup.sh";
-    scan = "${scriptDir}/scan.sh";
-  };
+
+programs.bash.shellAliases = {
+  # This automatically detects your machine name and targets the right flake
+  nrf = "sudo nixos-rebuild switch --flake /etc/nixos#$(hostname)";
+  borgmenu = "${scriptDir}/borg-backup.sh";
+  scan = "${scriptDir}/scan.sh";
+};
 }
 
