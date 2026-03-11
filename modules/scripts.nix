@@ -18,8 +18,8 @@ in
     fi
   '';
 programs.bash.shellAliases = {
-  nrf = "sudo nixos-rebuild switch --flake /etc/nixos#lenovo";
-  borgmenu = "borg-backup.sh"; # Just the command name
+  nrf = "sudo nixos-rebuild switch --flake /etc/nixos#$(hostname)";
+  backup = "borg-backup.sh"; # Just the command name
   scan = "scan.sh";
 };
 }
