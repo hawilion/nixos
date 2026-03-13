@@ -10,7 +10,7 @@ in
   nixpkgs.config.allowUnfree = true;
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
   nix.settings.download-buffer-size = 67108864;
-  
+  zramSwap.enable = true;  
   nix.gc = {
     automatic = true;
     dates = "weekly";
@@ -144,19 +144,34 @@ in
     ];
   };
 
-  # ------------------------------------------------
-  # SYSTEM PACKAGES
-  # ------------------------------------------------
-  environment.systemPackages = with pkgs; [
-    borgbackup sops jq openssh tree ripgrep bash coreutils 
+# Define the wrapped package first
+  environment.systemPackages = let
+    logseq-fixed = pkgs.symlinkJoin {
+      name = "logseq";
+      paths = [ pkgs.logseq ];
+      buildInputs = [ pkgs.makeWrapper ];
+      postBuild = ''
+        wrapProgram $out/bin/logseq \
+          --add-flags "--disable-gpu" \
+          --add-flags "--disable-software-rasterizer" \
+          --add-flags "--no-sandbox"
+      '';
+    };
+  in with pkgs; [
+    borgbackup sops jq openssh tree ripgrep bash coreutils  
     curl wget parted util-linux age syncthing xsane nmap
-    plocate neovim logseq nextcloud-client libnotify yq 
-    imagemagick img2pdf zenity vim brave git pavucontrol 
+    plocate neovim nextcloud-client libnotify yq  
+    imagemagick img2pdf zenity vim brave git pavucontrol  
     sof-firmware alsa-utils
+    
+    # Now just reference the variable here
+    logseq-fixed
   ];
+
   environment.sessionVariables = {
   SOPS_AGE_KEY_FILE = "/home/mike/.config/sops/age/keys.txt";
 };
+
 
 sops = {
   defaultSopsFile = ./secrets/${config.networking.hostName}.yaml;
