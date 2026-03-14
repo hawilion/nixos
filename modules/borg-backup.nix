@@ -1,4 +1,4 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, ... }:
 
 {
   sops.secrets.borg_passphrase = {
@@ -6,6 +6,7 @@
     mode = "0400";
   };
 
+  # 1. Define the Backup Job
   services.borgbackup.jobs."${config.networking.hostName}" = {
     paths = [ "/home/mike" "/etc/nixos" ];
     exclude = [ "**/.cache" "**/Downloads" ];
@@ -13,7 +14,6 @@
     
     repo = "mike@192.168.79.72:/mnt/backupdisk/borg/${config.networking.hostName}";
     
-    # 2:00 PM daily, with persistence so it catches up if you were asleep
     startAt = "14:00:00";
     persistentTimer = true;
     
@@ -37,8 +37,8 @@
     };
   };
 
-  # Dependency and Retry logic
-  systemd.services."borgbackup-job-lenovo" = {
+  # 2. Define the Systemd settings for the service that Borg created
+  systemd.services."borgbackup-job-${config.networking.hostName}" = {
     after = [ "network-online.target" ];
     wants = [ "network-online.target" ];
     serviceConfig = {
@@ -46,6 +46,8 @@
       RestartSec = "5min";
       StartLimitBurst = 3;
       StartLimitIntervalSec = 900;
+      # This helps if the service needs access to SSH keys
+      ReadWritePaths = [ "/home/mike/.ssh" ];
     };
   };
 }
