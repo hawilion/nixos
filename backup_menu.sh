@@ -27,6 +27,7 @@ show_menu() {
     echo "2) List Archives"
     echo "3) Repo Info & Deduplication Stats"
     echo "4) Check Last 3 Backups"
+    echo "5) Check Journal"
     echo "q) Quit"
     echo "=========================================="
     read -p "Select: " choice
@@ -37,24 +38,30 @@ while true; do
     case $choice in
         1)
             echo "Starting managed backup job..."
-            # This triggers your borg-backup.nix configuration directly
-            systemctl start borgbackup-job-$(hostname)
-            echo "Backup job initiated. Check 'journalctl -u borgbackup-job-$(hostname)' for status."
+            systemctl start "borgbackup-job-$(hostname)"
+            echo "Job initiated. Use option 5 to check status."
             read -p "Press enter to return to menu..."
             ;;
-        2) 
-            borg list $REPO 
+        2)  
+            borg list "$REPO"  
             read -p "Press enter to return to menu..."
             ;;
-        3) 
-            borg info $REPO 
+        3)  
+            borg info "$REPO"  
             read -p "Press enter to return to menu..."
             ;;
-        4) 
+        4)  
             echo "Fetching latest 3 archives..."
-            borg list $REPO --last 3 
-            read -p "Press enter to continue..." 
+            borg list "$REPO" --last 3  
+            read -p "Press enter to continue..."  
+            ;;
+        5)
+            echo "--- Latest 20 Backup Log Entries ---"
+            journalctl -u "borgbackup-job-$(hostname)" -n 20 --no-hostname
+            echo "------------------------------------"
+            read -p "Press enter to return to menu..."
             ;;
         q) exit 0 ;;
+        *) echo "Invalid option"; sleep 1 ;;
     esac
 done

@@ -38,14 +38,20 @@
   };
 
   # 2. Define the Systemd settings for the service that Borg created
-  systemd.services."borgbackup-job-${config.networking.hostName}" = {
+
+ systemd.services."borgbackup-job-${config.networking.hostName}" = {
     after = [ "network-online.target" ];
     wants = [ "network-online.target" ];
+    
+    unitConfig = {
+      # These belong here in modern systemd to prevent "Unknown key" warnings
+      StartLimitBurst = 3;
+      StartLimitIntervalSec = 900;
+    };
+
     serviceConfig = {
       Restart = "on-failure";
       RestartSec = "5min";
-      StartLimitBurst = 3;
-      StartLimitIntervalSec = 900;
       # This helps if the service needs access to SSH keys
       ReadWritePaths = [ "/home/mike/.ssh" ];
     };
