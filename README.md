@@ -1,21 +1,43 @@
-My personal NixOS configuration for my machines (Lenovo & HP).
+# ❄️ NixOS Configuration Hub (Hawi Homestead)
 
-Overview
-System: NixOS (Unstable/Stable)
+Personal NixOS Flake configuration for the **Lenovo** (Primary) and **HP** (Portable) machines.
 
-y
+---
 
-Backup: Managed via BorgBackup to a remote server.
+## 🚀 Quick Usage
+- **Rebuild System:** `nrf` (alias for `sudo nixos-rebuild switch --flake .#hostname`)
+- **Backups:** `backup` (launches interactive `backup_menu.sh`)
+- **Edit Secrets:** `secrets` (opens SOPS-nix yaml)
 
-Secret Management: SOPS-nix.
+## 🛠 Maintenance & Syncing
+Because `/etc/nixos` is owned by `root`, use the **"Permission Sandwich"** to sync with GitHub:
+1. **Claim:** `sudo chown -R mike:users /etc/nixos`
+2. **Sync:** `git pull` or `git push origin master`
+3. **Lock:** `sudo chown -R root:root /etc/nixos`
 
-Usage
-To apply changes:
-sudo nixos-rebuild switch --flake .#hostname
+> **Note:** Always run `backup_menu.sh` as sudo (this is handled by the `backup` alias).
 
-Directory Structure
-modules/: Shared configuration logic.
+---
 
-hosts/: Host-specific settings for each device.
+## 📦 System Architecture
+- **Flake Based:** Managed via `flake.nix` in the root.
+- **Secrets:** Encrypted via **SOPS-Nix** (Age key required for decryption).
+- **Backups:** **BorgBackup** managed by systemd jobs (`modules/borg-backup.nix`).
+- **Portability:** `backup_menu.sh` uses `$SCRIPT_DIR` and `$(hostname)` to work across both machines.
 
-secrets/: Encrypted secrets (via SOPS).
+## 💻 Hardware Specifics
+- **Lenovo:** Remote Borg Target: `192.168.79.72`.
+- **HP:** Portable unit. Requires `network-online.target` for automated backup success.
+
+---
+
+## 🔍 Troubleshooting & History
+- **View Logs:** Use Option 5 in the `backup` menu to see `journalctl` entries.
+- **Search Logic:** Technical deep-dives are preserved in Git commits.
+  - Search: `git log --grep="keyword"`
+  - View Code + Notes: `git log -p`
+
+## 📅 Significant Changes
+- **2026-03-16:** Fixed Systemd `unitConfig` warnings and integrated logs into menu.
+- **2026-03-15:** Refactored `backup_menu.sh` for hardware-agnostic path resolution.
+- **2026-03-06:** Initial secrets implementation via SOPS-Nix.
