@@ -162,15 +162,29 @@ in
     curl wget parted util-linux age syncthing xsane nmap
     plocate neovim nextcloud-client libnotify yq  
     imagemagick img2pdf zenity vim brave git pavucontrol  
-    sof-firmware alsa-utils
-    
+    sof-firmware alsa-utils glow helix nixd statix #lintx code for "best practices"
+     
     # Now just reference the variable here
     logseq-fixed
   ];
+  
+  # Optional: Set Helix as your default editor for git/terminal
+  environment.variables.EDITOR = "hx";
 
   environment.sessionVariables = {
   SOPS_AGE_KEY_FILE = "/home/mike/.config/sops/age/keys.txt";
 };
+
+
+  programs.git = {
+    enable = true;
+    config = {
+      safe = {
+        directory = "/etc/nixos";
+      };
+    };
+  };
+
 
 
 sops = {

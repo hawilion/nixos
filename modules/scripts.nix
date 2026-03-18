@@ -23,6 +23,8 @@ programs.bash.shellAliases = {
   scan = "scan.sh";
   calc = "libreoffice --calc";
   writer = "libreoffice --writer";
+  notes = "glow /etc/nixos/README.md";
+  edscripts = "sudo nano /etc/nixos/modules/scripts.nix";
     };
 
 }

@@ -41,3 +41,13 @@ Because `/etc/nixos` is owned by `root`, use the **"Permission Sandwich"** to sy
 - **2026-03-16:** Fixed Systemd `unitConfig` warnings and integrated logs into menu.
 - **2026-03-15:** Refactored `backup_menu.sh` for hardware-agnostic path resolution.
 - **2026-03-06:** Initial secrets implementation via SOPS-Nix.
+
+## ⌨️ Common Aliases
+These shortcuts are defined in `modules/scripts.nix`:
+## ⌨️ Common Aliases
+* **`nrf`** — Rebuild system: `sudo nixos-rebuild switch --flake .#hostname`
+* **`backup`** — Launch interactive Borg backup & log menu
+* **`notes`** — View this README (formatted via Glow)
+* **`secrets`** — Edit encrypted SOPS-nix secrets
+* **`edscripts`** — Quickly edit the system aliases and scripts file.
+
