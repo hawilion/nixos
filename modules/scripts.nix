@@ -18,7 +18,9 @@ in
     fi
   '';
 programs.bash.shellAliases = {
-  nrf = "sudo nixos-rebuild switch --flake /etc/nixos#$(hostname)";
+  hxs = "hx /etc/nixos/modules/scripts.nix"; # Add this
+  conf = "hx /etc/nixos";                   # Add this
+  hxconf = "hx /etc/nixos/configuration.nix && nix-instantiate --parse /etc/nixos/configuration.nix";
   backup = "sudo /etc/nixos/backup_menu.sh"; # Just the command name
   scan = "scan.sh";
   calc = "libreoffice --calc";
