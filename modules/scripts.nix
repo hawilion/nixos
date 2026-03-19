@@ -19,6 +19,7 @@ in
   '';
 programs.bash.shellAliases = {
   hxs = "hx /etc/nixos/modules/scripts.nix"; # Add this
+  nrf = "sudo nixos-rebuild switch --flake /etc/nixos";
   conf = "hx /etc/nixos";                   # Add this
   hxconf = "hx /etc/nixos/configuration.nix && nix-instantiate --parse /etc/nixos/configuration.nix";
   backup = "sudo /etc/nixos/backup_menu.sh"; # Just the command name
