@@ -222,7 +222,11 @@ sops = {
 
   environment.etc."profile.d/custom-path.sh".text = "export PATH=$HOME/bin:$PATH";
   environment.etc."nvim-config/init.lua".source = ./nvim-config/init.lua;
-
+  environment.etc."xdg/konsolerc".text = ''
+  [MainWindow]
+  MenuBar=Disabled
+  ToolBarsSelfAbsent=true
+'';
   system.activationScripts.nvim-symlink.text = ''
     mkdir -p /home/mike/.config/nvim
     ln -sf /etc/nixos/nvim-config/init.lua /home/mike/.config/nvim/init.lua
