@@ -163,7 +163,8 @@ in
     plocate neovim nextcloud-client libnotify yq  
     imagemagick img2pdf zenity vim brave git pavucontrol  
     sof-firmware alsa-utils glow helix nixd statix #lintx code for "best practices"
-     
+    foot
+   
     # Now just reference the variable here
     logseq-fixed
   ];
