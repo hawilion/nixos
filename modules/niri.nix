@@ -1,15 +1,19 @@
 { pkgs, ... }: {
-  # 1. Enable the Niri program
+  # 1. Enable the Niri program and disable Plasma "ghosts"
   programs.niri.enable = true;
+  systemd.user.services.plasma-plasmashell.enable = false;
+  systemd.user.services.plasma-krunner.enable = false;
 
-  # 2. Tell the already-enabled niri to skip its tests
+  # 2. Tell the already-enabled niri to skip its tests (the SIGABRT fix)
   programs.niri.package = pkgs.niri.overrideAttrs (old: {
     doCheck = false;
   });
 
-  # ... (keep your environment.sessionVariables and environment.etc as they were)
-  # Hardware/Driver specific environment variables for Niri
+  # 3. Nvidia and Identity environment variables
   environment.sessionVariables = {
+    XDG_CURRENT_DESKTOP = "niri";
+    XDG_SESSION_DESKTOP = "niri";
+    QT_QPA_PLATFORM = "wayland";
     NIXOS_OZONE_WL = "1";
     LIBVA_DRIVER_NAME = "nvidia";
     GBM_BACKEND = "nvidia-drm";
@@ -18,78 +22,27 @@
     BRAVE_FLAGS = "--enable-features=UseOzonePlatform --ozone-platform=wayland"; 
   };
 
-  # Helper packages for the Niri environment
+  # 4. Helper packages
   environment.systemPackages = with pkgs; [
-    waybar             # Status bar
-    fuzzel             # App launcher
-    xwayland-satellite # For X11 app support
-    wl-clipboard       # Required for copy/paste (Ctrl+Shift+C/V)
-    alacritty          # Fast terminal
+    waybar
+    fuzzel
+    xwayland-satellite
+    wl-clipboard
+    alacritty
+    foot # Adding foot just in case, since we used it earlier
   ];
-# This tells Nix: "Take this text and put it in a file at /etc/niri/config.kdl"
+
+  # 5. The Niri Configuration (KDL)
   environment.etc."niri/config.kdl".text = ''
-    // Niri Starter Config - March 2026
-spawn-at-startup "sh" "-c"  "killall plasmashell krunner kded6 || true"
-spawn-at-startup "waybar"
-input {
-    keyboard {
-        xkb {
-            layout "us"
-        }
+    spawn-at-startup "sh" "-c" "systemctl --user stop plasma-plasmashell.service plasma-krunner.service plasma-kded6.service || true"
+    spawn-at-startup "waybar"
+
+    binds {
+        Mod+T { spawn "alacritty"; }
+        Mod+D { spawn "fuzzel"; }
+        Mod+E { spawn "dolphin"; }
+        Mod+B { spawn "brave"; }
+        Mod+Shift+E { quit; }
     }
-    touchpad {
-        tap
-        natural-scroll
-    }
-    mouse {
-        // Essential for Nvidia cursors if they feel floaty
-        accel-speed 0.2
-    }
-}
-
-layout {
-    // This creates the "spacing" between your windows
-    gaps 12
-    center-focused-column-window
-    
-    // Default width for new windows (adjust to your monitor size)
-    default-column-width { proportion 0.5; }
-}
-
-// Keybindings - The "Mod" key is usually the Windows/Super key
-binds {
-    // --- System Actions ---
-    Mod+Shift+E { quit; }
-    Mod+Shift+Slash { show-hotkey-overlay; } // Show this list in-app!
-
-    // --- App Launchers ---
-    Mod+T { spawn "foot"; }              // Launch your terminal
-    Mod+D { spawn "fuzzel"; }            // Launch your app menu
-    Mod+B { spawn "firefox"; }           // Launch your browser
-
-    // --- Window Navigation (The "Scroll") ---
-    Mod+Left  { focus-column-left; }
-    Mod+Right { focus-column-right; }
-    Mod+H     { focus-column-left; }     // Vim-style keys
-    Mod+L     { focus-column-right; }
-
-    // --- Moving Windows ---
-    Mod+Shift+Left  { move-column-left; }
-    Mod+Shift+Right { move-column-right; }
-
-    // --- Window Sizing ---
-    Mod+R { switch-preset-column-width; } // Cycles through 1/3, 1/2, 2/3 width
-    Mod+F { maximize-column; }            // Toggle Fullscreen
-    
-    // --- Closing Windows ---
-    Mod+Q { close-window; }
-
-    // --- Other Binds ---
-    Mod+B  { Spawn "brave"; }
-}
-
-// Nvidia specific: Ensures smooth rendering
-spawn-at-startup "xwayland-satellite"
-'';
-}
-
+  ''; # <-- YOU NEEDED THIS TO CLOSE THE TEXT BLOCK
+} # <-- YOU NEEDED THIS TO CLOSE THE WHOLE FILE
