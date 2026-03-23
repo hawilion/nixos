@@ -29,7 +29,7 @@
 # This tells Nix: "Take this text and put it in a file at /etc/niri/config.kdl"
   environment.etc."niri/config.kdl".text = ''
     // Niri Starter Config - March 2026
-spawn-at-startup "killall" "plasmashell" "krunner" "kded6"
+spawn-at-startup "sh" "-c"  "killall plasmashell krunner kded6 || true"
 spawn-at-startup "waybar"
 input {
     keyboard {
