@@ -51,3 +51,18 @@ These shortcuts are defined in `modules/scripts.nix`:
 * **`secrets`** — Edit encrypted SOPS-nix secrets
 * **`edscripts`** — Quickly edit the system aliases and scripts file.
 
+
+## Recent Updates - 2026-03-22
+- Successfully integrated Niri compositor using Flake inputs.
+- Resolved Nvidia Wayland cursor issues and build-time test failures.
+- Terminal: Foot configured with Wayland-native support.
+
+### Niri Quick-Start Keybinds
+| Action | Shortcut |
+| :--- | :--- |
+| **Terminal** | Mod + T |
+| **Launcher** | Mod + D |
+| **Close** | Mod + Q |
+| **Move** | Mod + Left/Right |
+| **Exit** | Mod + Shift + E |
+

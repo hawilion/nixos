@@ -15,6 +15,7 @@
     GBM_BACKEND = "nvidia-drm";
     __GLX_VENDOR_LIBRARY_NAME = "nvidia";
     WLR_NO_HARDWARE_CURSORS = "1";
+    BRAVE_FLAGS = "--enable-features=UseOzonePlatform --ozone-platform=wayland"; 
   };
 
   # Helper packages for the Niri environment
@@ -80,6 +81,9 @@ binds {
     
     // --- Closing Windows ---
     Mod+Q { close-window; }
+
+    // --- Other Binds ---
+    Mod+B  { Spawn "brave"; }
 }
 
 // Nvidia specific: Ensures smooth rendering
