@@ -7,9 +7,10 @@
     sops-nix.url = "github:Mic92/sops-nix";
     sops-nix.inputs.nixpkgs.follows = "nixpkgs";
     nix-flatpak.url = "github:gmodena/nix-flatpak";
+    niri.url = "github:sodiboo/niri-flake";
   };
 
-  outputs = { self, nixpkgs, nixpkgs-unstable, sops-nix, nix-flatpak, ... }@inputs:
+  outputs = { self, nixpkgs, nixpkgs-unstable, sops-nix, nix-flatpak, niri, ... }@inputs:
     let
       system = "x86_64-linux";
       unstable = import nixpkgs-unstable {  
@@ -31,6 +32,7 @@
             ./modules/ai.nix
             sops-nix.nixosModules.sops
             nix-flatpak.nixosModules.nix-flatpak
+            niri.nixosModules.niri
           ];
         };
 

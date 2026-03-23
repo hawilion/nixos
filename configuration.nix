@@ -27,6 +27,7 @@ in
     ./modules/syncthing.nix
     ./modules/libreoffice-minimal.nix
     ./modules/scripts.nix
+    ./modules/niri.nix
   ];
 
   # ------------------------------------------------
@@ -163,7 +164,7 @@ in
     plocate neovim nextcloud-client libnotify yq  
     imagemagick img2pdf zenity vim brave git pavucontrol  
     sof-firmware alsa-utils glow helix nixd statix #lintx code for "best practices"
-    foot
+    foot 
    
     # Now just reference the variable here
     logseq-fixed
@@ -185,7 +186,6 @@ in
       };
     };
   };
-
 
 
 sops = {
