@@ -27,6 +27,10 @@
     wl-clipboard
     alacritty
     foot
+    # --- Screenshot Tools ---
+    grim
+    slurp
+    swayimg # A lightweight image viewer to check your shots
   ];
 
   # 5. The Niri Configuration (KDL Format)
@@ -52,34 +56,36 @@
     spawn-at-startup "sh" "-c" "systemctl --user stop plasma-plasmashell.service plasma-krunner.service plasma-kded6.service || true"
     spawn-at-startup "waybar"
     spawn-at-startup "alacritty"
-
-    binds {
-        // EMERGENCY BACKDOOR: Always keep these active
-        Ctrl+Alt+T { spawn "alacritty"; }
-        Ctrl+Alt+Delete { quit; } 
-
-        // Standard App Shortcuts
-        Mod+T { spawn "alacritty"; }
-        Mod+D { spawn "fuzzel"; }
-        Mod+E { spawn "dolphin"; }
-        Mod+B { spawn "brave"; }
-        Mod+Shift+E { quit; }
-        
-        // Window & Column Navigation
-        Mod+W { close-window; }
-        Mod+Left { focus-column-left; }
-        Mod+Right { focus-column-right; }
-        
-        // Column Sizing
-        Mod+Comma { consume-window-into-column; }
-        Mod+Period { expel-window-from-column; }
-        Mod+R { switch-preset-column-width; }
-        Mod+F { maximize-column; }
-        
-        // ... your other binds ...
     
-        Mod+Slash { show-hotkey-overlay; }
-}
+binds {
+        // --- System ---
+        Ctrl+Alt+Delete { quit; }
+        Alt+Shift+E { quit; }
+
+        // --- Apps ---
+        Alt+T { spawn "alacritty"; }
+        Alt+B { spawn "brave"; }
+        Alt+D { spawn "fuzzel"; }
+        Alt+L { spawn "logseq"; }
+        
+        // --- Utilities ---
+        Alt+Slash { show-hotkey-overlay; }
+        Print { spawn "sh" "-c" "grim ~/Pictures/$(date +%H%M%S).png"; }
+        Alt+S { spawn "sh" "-c" "grim ~/Pictures/$(date +%H%M%S).png"; }
+
+        // --- Window Navigation ---
+        Alt+W { close-window; }
+        Alt+Left { focus-column-left; }
+        Alt+Right { focus-column-right; }
+        
+       //  --- Other binds (Alt+T, Alt+B, etc.) ...
+        // 1. The "Cheat Sheet" (Show all your shortcuts instantly)
+        Alt+Slash { show-hotkey-overlay; }
+
+        // 2. The "Back to Plasma" (This quits Niri so you can log into Plasma)
+        Alt+Shift+P { quit; } 
+        Alt+Tab { toggle-window-floating; } // Note: Standard Alt+Tab behavior
+        Alt+O { toggle-overview; }          // 'O' for Overview
     }
-  '';
+ '';
 }
