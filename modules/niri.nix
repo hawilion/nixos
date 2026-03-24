@@ -1,91 +1,56 @@
-{ pkgs, ... }: {
-  # 1. Enable Niri and disable interfering Plasma services
-  programs.niri.enable = true;
-  systemd.user.services.plasma-plasmashell.enable = false;
-  systemd.user.services.plasma-krunner.enable = false;
+{ config, pkgs, ... }:
 
-  # 2. Skip tests to prevent the SIGABRT build error
-  programs.niri.package = pkgs.niri.overrideAttrs (old: {
-    doCheck = false;
-  });
+{
+  # This tells Nix: "Everything inside these quotes is just text for Niri"
+environment.etc."niri/config.kdl".text  = ''
+layout {
+    gaps 12
+    center-focused-column "never"
 
-  # 3. Environment Variables (Optimized for Intel i915 Graphics)
-  environment.sessionVariables = {
-    XDG_CURRENT_DESKTOP = "niri";
-    XDG_SESSION_DESKTOP = "niri";
-    QT_QPA_PLATFORM = "wayland";
-    NIXOS_OZONE_WL = "1"; # Essential for Brave/Electron apps
-    TERMINAL = "alacritty";
-    BRAVE_FLAGS = "--enable-features=UseOzonePlatform --ozone-platform=wayland"; 
-  };
-
-  # 4. Essential Packages for the Niri Environment
-  environment.systemPackages = with pkgs; [
-    waybar
-    fuzzel
-    xwayland-satellite
-    wl-clipboard
-    alacritty
-    foot
-    # --- Screenshot Tools ---
-    grim
-    slurp
-    swayimg # A lightweight image viewer to check your shots
-  ];
-
-  # 5. The Niri Configuration (KDL Format)
-  environment.etc."niri/config.kdl".text = ''
-    input {
-        keyboard {
-            xkb {
-                layout "us"
-            }
-        }
-        touchpad { 
-            tap
-            natural-scroll
-        }
+    preset-column-widths {
+        proportion 0.25   // Fits 4 windows (Press Alt+R to cycle)
+        proportion 0.333  // Fits 3 windows
+        proportion 0.5    // Fits 2 windows
+        proportion 0.666  // Two thirds screen
     }
 
-    layout {
-        gaps 12
-        center-focused-column "never"
-    }
+    default-column-width { proportion 0.5; }
+}
 
-    // Startup commands
-    spawn-at-startup "sh" "-c" "systemctl --user stop plasma-plasmashell.service plasma-krunner.service plasma-kded6.service || true"
-    spawn-at-startup "waybar"
-    spawn-at-startup "alacritty"
-    
+// Startup commands
+spawn-at-startup "sh" "-c" "systemctl --user stop plasma-plasmashell.service plasma-krunner.service plasma-kded6.service || true"
+spawn-at-startup "waybar"
+spawn-at-startup "alacritty"
+
 binds {
-        // --- System ---
-        Ctrl+Alt+Delete { quit; }
-        Alt+Shift+E { quit; }
+    // --- System Controls ---
+    Ctrl+Alt+Delete { quit; }
+    Alt+Shift+P { quit; } 
 
-        // --- Apps ---
-        Alt+T { spawn "alacritty"; }
-        Alt+B { spawn "brave"; }
-        Alt+D { spawn "fuzzel"; }
-        Alt+L { spawn "logseq"; }
-        
-        // --- Utilities ---
-        Alt+Slash { show-hotkey-overlay; }
-        Print { spawn "sh" "-c" "grim ~/Pictures/$(date +%H%M%S).png"; }
-        Alt+S { spawn "sh" "-c" "grim ~/Pictures/$(date +%H%M%S).png"; }
+    // --- App Launchers ---
+    Alt+T { spawn "alacritty"; }
+    Alt+B { spawn "brave"; }
+    Alt+D { spawn "fuzzel"; }
+    Alt+L { spawn "logseq"; }
 
-        // --- Window Navigation ---
-        Alt+W { close-window; }
-        Alt+Left { focus-column-left; }
-        Alt+Right { focus-column-right; }
-        
-       //  --- Other binds (Alt+T, Alt+B, etc.) ...
-        // 1. The "Cheat Sheet" (Show all your shortcuts instantly)
-        Alt+Slash { show-hotkey-overlay; }
+    // --- Window Management ---
+    Alt+W { close-window; }
+    Alt+R { switch-preset-column-width; }
+    Alt+F { maximize-column; }
 
-        // 2. The "Back to Plasma" (This quits Niri so you can log into Plasma)
-        Alt+Shift+P { quit; } 
-        Alt+Tab { toggle-window-floating; } // Note: Standard Alt+Tab behavior
-        Alt+O { toggle-overview; }          // 'O' for Overview
-    }
- '';
+    // This is the most stable "unified" command for vertical stacking
+    Alt+V { consume-window-into-column; }
+    Alt+Shift+V { expel-window-from-column; }
+    
+    // --- Navigation ---
+    Alt+Left  { focus-column-left; }
+    Alt+Right { focus-column-right; }
+    Alt+Slash { show-hotkey-overlay; }
+    
+    // --- Manual Sizing ---
+    Alt+Minus { set-column-width "-10%"; }
+    Alt+Equal { set-column-width "+10%"; }
+}
+
+    '';
 }
