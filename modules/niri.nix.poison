@@ -1,0 +1,74 @@
+{ config, pkgs, ... }:
+
+{
+  environment.etc."niri/config.kdl".text = ''
+    layout {
+        gaps 12
+        center-focused-column "never"
+
+        preset-column-widths {
+            proportion 0.25   
+            proportion 0.333  
+            proportion 0.5    
+            proportion 0.666  
+        }
+
+        default-column-width { proportion 0.25; }
+        
+        focus-ring {
+            width 5
+            active-color "#74b2ff"   // Kona Blue
+            inactive-color "#475da7" // Darker blue
+        }
+    }
+
+    // Startup commands
+    spawn-at-startup "sh" "-c" "systemctl --user stop plasma-plasmashell.service plasma-krunner.service plasma-kded6.service || true"
+    spawn-at-startup "waybar"
+    spawn-at-startup "alacritty"
+    
+    // Window Rules
+    window-rule {
+        // Make every window try to be at least 33% wide if space allows
+        min-width { proportion 0.333; }
+    }
+
+    window-rule {
+        match app-id="brave"
+        default-column-width { proportion 0.5; } // Brave loves 50% for SketchUp
+    }
+
+    window-rule {
+        match app-id="logseq"
+        default-column-width { proportion 0.333; }
+    }
+
+    binds {
+        // --- System ---
+        Ctrl+Alt+Delete { quit; }
+
+        // --- App Launchers ---
+        Alt+T { spawn "alacritty"; }
+        Alt+D { spawn "fuzzel"; }
+        Alt+B { spawn "brave"; }
+        Alt+L { spawn "logseq"; }
+
+        // --- Window Management ---
+        Alt+W { close-window; }
+        Alt+F { maximize-column; }
+        Alt+R { switch-preset-column-width; }
+        Alt+V { consume-window-into-column; }
+        Alt+Shift+V { expel-window-from-column; }
+
+        // --- Navigation ---
+        Alt+Left  { focus-column-left; }
+        Alt+Right { focus-column-right; }
+        Alt+A     { toggle-overview; }
+        Alt+Slash { show-hotkey-overlay; }
+
+        // --- Sizing ---
+        Alt+Minus { set-column-width "-10%"; }
+        Alt+Equal { set-column-width "+10%"; }
+    }
+  '';
+}

@@ -45,6 +45,7 @@ in
     extraBackends = [ pkgs.brscan4 ];
   };
 
+
   # ------------------------------------------------
   # NETWORKING
   # ------------------------------------------------
@@ -66,6 +67,7 @@ in
   security.rtkit.enable = true; # Required for PipeWire real-time priority
 
   services = {
+    tailscale.enable = true;
     xserver.enable = true;
     displayManager.sddm.enable = true;
     desktopManager.plasma6.enable = true;
@@ -82,6 +84,11 @@ in
       wireplumber.enable = true;
     };
 
+    # ____________________________________
+    
+    #reduce touchpad and keyboard sensitivity
+    
+    #_______________________________________________ 
     libinput = {
       enable = true;
       touchpad = {
@@ -164,8 +171,7 @@ in
     plocate neovim nextcloud-client libnotify yq  
     imagemagick img2pdf zenity vim brave git pavucontrol  
     sof-firmware alsa-utils glow helix nixd statix #lintx code for "best practices"
-    foot 
-   
+    foot alacritty fuzzel brave waybar kdePackages.dolphin kdePackages.kio-extras    
     # Now just reference the variable here
     logseq-fixed
   ];
@@ -177,6 +183,14 @@ in
   SOPS_AGE_KEY_FILE = "/home/mike/.config/sops/age/keys.txt";
 };
 
+xdg.portal = {
+  enable = true;
+  extraPortals = [ pkgs.xdg-desktop-portal-gnome ];
+  config.common.default = [ "gnome" "gtk" ];
+};
+
+# Ensure dconf is enabled (required for many GTK portals)
+programs.dconf.enable = true;
 
   programs.git = {
     enable = true;
@@ -186,8 +200,12 @@ in
       };
     };
   };
-
-
+  
+  programs.niri = {
+    enable = true;
+    package = pkgs.niri; # This ensures it uses the one from your flake
+  };
+  
 sops = {
   defaultSopsFile = ./secrets/${config.networking.hostName}.yaml;
   age.keyFile = "/home/mike/.config/sops/age/keys.txt";

@@ -2,62 +2,71 @@
 
 {
   environment.etc."niri/config.kdl".text = ''
+    // --- Layout & Styling ---
     layout {
         gaps 12
         center-focused-column "never"
-
-        preset-column-widths {
-            proportion 0.25   
-            proportion 0.333  
-            proportion 0.5    
-            proportion 0.666  
-        }
-
-        default-column-width { proportion 0.5; }
-
-        // Defining the block turns it on—no "enable" keyword needed!
-        focus-ring {
-            width 2
-            active-color "#74b2ff"   // Kona Blue
-            inactive-color "#475da7" // Darker blue
-        }
+        
+        default-column-width { proportion 0.25; }
+      focus-ring {
+            width 10            // Doubled from 5 to 10 for visibility
+            active-color "#00e5ff"   // Electric Cyan (High contrast)
+            inactive-color "#1a237e" // Deep Navy (Fades into background)
+            
+            // Optional: Adds a subtle glow if your Niri version supports it
+            // active-gradient from="#00e5ff" to="#74b2ff" angle=45
+        }  
     }
 
-    // Startup commands
+    // --- Startup Services ---
+    // This stops Plasma services so they don't fight Niri for your screen
     spawn-at-startup "sh" "-c" "systemctl --user stop plasma-plasmashell.service plasma-krunner.service plasma-kded6.service || true"
+    
     spawn-at-startup "waybar"
     spawn-at-startup "alacritty"
 
+    // --- Window Rules ---
+    window-rule {
+        match app-id="brave"
+        default-column-width { proportion 0.5; } 
+    }
+
+    window-rule {
+        match app-id="logseq"
+        default-column-width { proportion 0.333; }
+    }
+
+    // --- Keybindings ---
+    // We are leaving this section EMPTY to use Niri's built-in defaults (Super/Mod key).
+    // Press 'Mod + /' in-game to see the full list of default shortcuts.
     binds {
-        // --- System Controls ---
-        Ctrl+Alt+Delete { quit; }
-        Alt+Shift+P { quit; } 
+        // --- The "Cheat Sheet" (Fixes your Mod + / problem) ---
+        Mod+Slash { show-hotkey-overlay; }
 
-        // --- App Launchers ---
-        Alt+T { spawn "alacritty"; }
-        Alt+B { spawn "brave"; }
-        Alt+D { spawn "fuzzel"; }
-        Alt+L { spawn "logseq"; }
+        // --- Essential Navigation (Niri Defaults) ---
+        Mod+Left  { focus-column-left; }
+        Mod+Right { focus-column-right; }
+        Mod+Return { spawn "alacritty"; }
+        Mod+D     { spawn "fuzzel"; }
+        Mod+Q     { close-window; }
+        Mod+T      { spawn "foot"; }
 
-        // --- Window Management ---
-        Alt+W { close-window; }
-        Alt+R { switch-preset-column-width; }
-        Alt+F { maximize-column; }
-
-        // Stacking
-        Alt+V { consume-window-into-column; }
-        Alt+Shift+V { expel-window-from-column; }
         
-        // --- Navigation ---
-        Alt+Left  { focus-column-left; }
-        Alt+Right { focus-column-right; }
-        Alt+Slash { show-hotkey-overlay; }
-        Alt+Comma { switch-preset-column-width; } 
-        Alt+A     { toggle-overview; }   
+        binds {
+        // This is the correct "Internal" call for the sodiboo flake
+        Mod+Slash { show-hotkey-overlay; }
 
-        // --- Manual Sizing ---
-        Alt+Minus { set-column-width "-10%"; }
-        Alt+Equal { set-column-width "+10%"; }
+        Mod+D { spawn "fuzzel"; }
+        Mod+Enter { spawn "alacritty"; }
+        Mod+Q { close-window; }
+        
+        // Let's add the "Electric Cyan" reload shortcut
+        Mod+Shift+R { spawn "niri" "msg" "action" "load-config-file"; }
+    }
+        
+        // --- System ---
+        Mod+Shift+E { quit; }
+        Mod+Shift+R { spawn "niri" "msg" "action" "load-config-file"; }
     }
   '';
 }
