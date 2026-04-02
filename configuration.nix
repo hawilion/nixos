@@ -207,7 +207,8 @@ programs.dconf.enable = true;
   };
   
 sops = {
-  defaultSopsFile = ./secrets/${config.networking.hostName}.yaml;
+  
+  defaultSopsFile = ./secrets/secrets.yaml; # Relative paths are allowed
   age.keyFile = "/home/mike/.config/sops/age/keys.txt";
 
   secrets."borg_passphrase" = {  

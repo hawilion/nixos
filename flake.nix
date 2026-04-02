@@ -30,6 +30,7 @@
             ./modules/borg-backup.nix
             ./modules/scripts.nix
             ./modules/ai.nix
+            ./modules/nextcloud-server.nix
             sops-nix.nixosModules.sops
             nix-flatpak.nixosModules.nix-flatpak
             niri.nixosModules.niri
@@ -47,6 +48,17 @@
             nix-flatpak.nixosModules.nix-flatpak
           ];
         };
-      };
+       nixos-server = nixpkgs.lib.nixosSystem {
+         inherit system;
+         specialArgs = { inherit unstable inputs; };   
+         modules = [
+           ./configuration.nix
+           ./hosts/nixos-server.nix  # Make sure this file exists!
+           ./modules/nextcloud-server.nix
+           ./modules/borg-backup.nix
+           sops-nix.nixosModules.sops
+         ];
+       };
     };
+  };
 }
