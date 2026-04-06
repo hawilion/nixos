@@ -2,12 +2,27 @@
   services.nextcloud = {
     enable = true;
     package = pkgs.nextcloud32;
-    hostName = "nixos-server"; # Update this to your actual domain/IP if needed
+    hostName = "lenovo"; 
     database.createLocally = true;
+    # REMOVED: webserver.nginx.enable (and all variations)
+
     config = {
       dbtype = "pgsql";
-      adminpassFile = config.sops.secrets.nextcloud_admin_password.path;
+      dbuser = "nextcloud";
+      dbname = "nextcloud";
+      adminpassFile = config.sops.secrets.nextcloud_admin_pass.path;
       adminuser = "admin";
+    };
+  };
+
+  # Use the standard Nginx module to catch the Nextcloud traffic
+  services.nginx = {
+    enable = true;
+    virtualHosts."lenovo" = {
+      forceSSL = false; # Set to true once you have certs
+      addSSL = false;
+      # This line is the "magic" that connects them manually
+      locations."/".proxyPass = "http://127.0.0.1:8080"; 
     };
   };
 
@@ -20,7 +35,5 @@
     }];
   };
 
-  sops.secrets.nextcloud_admin_password = {
-    owner = "nextcloud";
-  };
+  sops.secrets.nextcloud_admin_pass.owner = "nextcloud";
 }
